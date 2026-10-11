@@ -115,7 +115,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         ))}
 
         {/* Host Management Portal Link */}
-        <div className="pt-3 border-t border-black/5 text-center space-y-1.5">
+        <div className="pt-3 border-t border-black/5 text-center space-y-2">
           <a
             href="/client"
             onClick={(e) => {
@@ -126,8 +126,12 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5C5A55] hover:text-[#2A4436] py-1.5 px-3 rounded-xl hover:bg-black/5 transition-colors"
           >
             <Settings className="w-3.5 h-3.5" />
-            <span>Property Host? Sign in to Client Dashboard (/client)</span>
+            <span>Property Host? Sign in to dwellio Portal (/client)</span>
           </a>
+
+          <div className="text-[11px] text-[#78756E]/80 font-medium">
+            Powered by <span className="font-serif font-bold text-[#1C1B18]">dwellio</span>
+          </div>
         </div>
       </div>
     </div>

@@ -22,15 +22,22 @@ import {
   ArrowRight,
   RefreshCw,
   Home,
-  Utensils
+  Utensils,
+  ShieldAlert,
+  User
 } from 'lucide-react';
-import { PropertyData, Recommendation, GuestStayStatus, PropertyCoordinates } from '../../types';
+import { PropertyData, Recommendation, GuestStayStatus, PropertyCoordinates, ClientAccount } from '../../types';
 import { 
   getPropertyBySlug, 
   saveProperty, 
   getAllPropertiesList, 
   DEFAULT_SLUG 
 } from '../../data/properties';
+import { 
+  getAllClients, 
+  getClientById, 
+  getClientByEmail 
+} from '../../data/clients';
 import { getStayStatus, setStayStatus } from '../../utils/stayState';
 import { OsmLocationPicker } from '../Map/OsmLocationPicker';
 import { fetchNearbyPlacesOSM } from '../../utils/osm';
@@ -41,17 +48,42 @@ interface ClientDashboardProps {
   onNavigateToAdmin: () => void;
 }
 
-const AUTH_STORAGE_KEY = 'client_portal_auth_session';
+const AUTH_STORAGE_KEY = 'dwellio_client_portal_session_v2';
 
 type MobileTab = 'status' | 'location' | 'guide' | 'places';
+
+interface ClientSession {
+  clientId: string;
+  name: string;
+  email: string;
+}
 
 export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   initialSlug = DEFAULT_SLUG,
   onNavigateToGuest,
   onNavigateToAdmin,
 }) => {
+  const [clients, setClients] = useState<ClientAccount[]>(getAllClients);
+  const [propertyList, setPropertyList] = useState(getAllPropertiesList);
+
+  // Sync clients and properties from storage live
+  useEffect(() => {
+    const handleSync = () => {
+      setClients(getAllClients());
+      setPropertyList(getAllPropertiesList());
+    };
+    window.addEventListener('clients-updated', handleSync);
+    window.addEventListener('properties-updated', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('clients-updated', handleSync);
+      window.removeEventListener('properties-updated', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
+
   // Session authentication state
-  const [session, setSession] = useState<{ slug: string; hostName: string } | null>(() => {
+  const [session, setSession] = useState<ClientSession | null>(() => {
     if (typeof window !== 'undefined') {
       const stored = sessionStorage.getItem(AUTH_STORAGE_KEY) || localStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
@@ -62,11 +94,41 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         }
       }
     }
-    return { slug: initialSlug, hostName: 'Host' };
+    // Default demo session: Sarah Jenkins
+    const defaultClient = getAllClients()[0];
+    if (defaultClient) {
+      return {
+        clientId: defaultClient.id,
+        name: defaultClient.name,
+        email: defaultClient.email,
+      };
+    }
+    return null;
   });
 
-  const [currentSlug, setCurrentSlug] = useState<string>(session ? session.slug : initialSlug);
-  const [loginSlug, setLoginSlug] = useState<string>(initialSlug);
+  // Client's Assigned Properties
+  const currentClient = session ? clients.find((c) => c.id === session.clientId) || clients.find((c) => c.email === session.email) : null;
+  const assignedSlugs = currentClient ? currentClient.assignedPropertySlugs : [];
+  const clientProperties = propertyList.filter((p) => assignedSlugs.includes(p.slug));
+
+  // Determine active property slug
+  const [currentSlug, setCurrentSlug] = useState<string>(() => {
+    if (assignedSlugs.length > 0) {
+      if (assignedSlugs.includes(initialSlug)) return initialSlug;
+      return assignedSlugs[0];
+    }
+    return initialSlug;
+  });
+
+  // When assigned properties or session changes, make sure currentSlug is valid
+  useEffect(() => {
+    if (assignedSlugs.length > 0 && !assignedSlugs.includes(currentSlug)) {
+      setCurrentSlug(assignedSlugs[0]);
+    }
+  }, [assignedSlugs, currentSlug]);
+
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState<string>(clients[0]?.email || 'sarah@dwellio.com');
   const [passcode, setPasscode] = useState<string>('host123');
   const [loginError, setLoginError] = useState<string | null>(null);
 
@@ -111,7 +173,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   // Guest Stay Status
   const [stayStatus, setLocalStayStatus] = useState<GuestStayStatus>(() => getStayStatus(currentSlug));
 
-  // Active Mobile Tab: 4 simple tabs
+  // Active Mobile Tab
   const [activeTab, setActiveTab] = useState<MobileTab>('status');
   const [isCopiedLink, setIsCopiedLink] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
@@ -166,36 +228,61 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   // Auth Handlers
   const handleLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!loginSlug) {
-      setLoginError('Please select a property.');
+    if (!loginEmail.trim()) {
+      setLoginError('Please enter your client account email.');
       return;
     }
-    const prop = getPropertyBySlug(loginSlug);
-    const authSession = { slug: prop.slug, hostName: prop.host.name };
-    setSession(authSession);
-    setCurrentSlug(prop.slug);
-    sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authSession));
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authSession));
+
+    const matchedClient = getClientByEmail(loginEmail.trim());
+    if (!matchedClient) {
+      setLoginError('Client account not found. Accounts can only be created by an administrator.');
+      return;
+    }
+
+    if (passcode.trim() && passcode.trim() !== matchedClient.passcode) {
+      setLoginError('Incorrect passcode.');
+      return;
+    }
+
+    const newSession: ClientSession = {
+      clientId: matchedClient.id,
+      name: matchedClient.name,
+      email: matchedClient.email,
+    };
+
+    setSession(newSession);
+    if (matchedClient.assignedPropertySlugs.length > 0) {
+      setCurrentSlug(matchedClient.assignedPropertySlugs[0]);
+    }
+    sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
     setLoginError(null);
-    showToast(`Signed in as host for ${prop.name}`);
+    showToast(`Signed in to dwellio as ${matchedClient.name}`);
   };
 
-  const handleQuickDemoLogin = (slug: string) => {
-    setLoginSlug(slug);
-    const prop = getPropertyBySlug(slug);
-    const authSession = { slug: prop.slug, hostName: prop.host.name };
-    setSession(authSession);
-    setCurrentSlug(prop.slug);
-    sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authSession));
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authSession));
-    showToast(`Signed in as ${prop.host.name} (${prop.name})`);
+  const handleQuickDemoLogin = (clientEmail: string) => {
+    const matchedClient = getClientByEmail(clientEmail);
+    if (matchedClient) {
+      const newSession: ClientSession = {
+        clientId: matchedClient.id,
+        name: matchedClient.name,
+        email: matchedClient.email,
+      };
+      setSession(newSession);
+      if (matchedClient.assignedPropertySlugs.length > 0) {
+        setCurrentSlug(matchedClient.assignedPropertySlugs[0]);
+      }
+      sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
+      showToast(`Signed in as ${matchedClient.name}`);
+    }
   };
 
   const handleLogout = () => {
     setSession(null);
     sessionStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem(AUTH_STORAGE_KEY);
-    showToast('Signed out');
+    showToast('Signed out of dwellio');
   };
 
   // Guest Stay Status Toggle
@@ -300,7 +387,6 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     showToast(`Saved changes for ${updated.name}!`);
   };
 
-  const propertyList = getAllPropertiesList();
   const guestUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/client/${currentSlug}`;
 
   const copyGuestUrl = () => {
@@ -313,7 +399,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   };
 
   // =========================================================
-  // VIEW 1: SIGN IN SCREEN (MOBILE FIRST & CLEAN)
+  // VIEW 1: SIGN IN SCREEN (NO CLIENT SELF-REGISTRATION)
   // =========================================================
   if (!session) {
     return (
@@ -330,34 +416,47 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
           {/* Scrollable Login Container */}
           <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-8 flex flex-col justify-between">
-            <div className="space-y-6 my-auto">
-              {/* Header */}
+            <div className="space-y-5 my-auto">
+              {/* Header: dwellio branding */}
               <div className="text-center space-y-2">
-                <div className="w-14 h-14 rounded-2xl bg-[#EBF2EC] text-[#2A4436] flex items-center justify-center mx-auto shadow-sm">
-                  <Building2 className="w-7 h-7 stroke-[1.8]" />
+                <div className="w-14 h-14 rounded-2xl bg-[#2A4436] text-white flex items-center justify-center mx-auto shadow-sm font-serif font-bold text-2xl">
+                  d
                 </div>
-                <h1 className="font-serif text-2xl font-bold text-[#1C1B18] tracking-tight">
-                  Host Dashboard
-                </h1>
+                <div>
+                  <h1 className="font-serif text-2xl font-bold text-[#1C1B18] tracking-tight">
+                    dwellio
+                  </h1>
+                  <span className="text-[11px] font-bold text-[#78756E] uppercase tracking-wider block mt-0.5">
+                    Client Host Portal
+                  </span>
+                </div>
                 <p className="text-xs text-[#78756E] max-w-xs mx-auto leading-relaxed">
-                  Sign in to manage your house details, set your front door pin, and view your guest app.
+                  Sign in to manage your assigned properties, keypad codes, and guest instructions.
                 </p>
+              </div>
+
+              {/* Admin Governed Account Notice */}
+              <div className="p-3.5 rounded-2xl bg-[#EBF2EC] border border-[#2A4436]/20 text-[11px] text-[#2A4436] leading-relaxed flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-[#2A4436] shrink-0 mt-0.5" />
+                <div>
+                  <strong>Admin-Provisioned Accounts Only:</strong> Client accounts are created by your dwellio Administrator. If you need access or property assignment, contact your admin.
+                </div>
               </div>
 
               {/* Login Form */}
               <form onSubmit={handleLogin} className="space-y-4 bg-white p-5 rounded-3xl border border-black/5 shadow-soft-card">
                 <div>
                   <label className="block text-xs font-bold text-[#1C1B18] mb-1.5">
-                    Select Your Property
+                    Client Account
                   </label>
                   <select
-                    value={loginSlug}
-                    onChange={(e) => setLoginSlug(e.target.value)}
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
                     className="w-full px-3.5 py-3 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs font-semibold text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all cursor-pointer"
                   >
-                    {propertyList.map((p) => (
-                      <option key={p.slug} value={p.slug}>
-                        {p.name} ({p.location})
+                    {clients.map((c) => (
+                      <option key={c.id} value={c.email}>
+                        {c.name} ({c.email})
                       </option>
                     ))}
                   </select>
@@ -392,7 +491,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   type="submit"
                   className="w-full py-3.5 rounded-2xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <span>Sign In as Host</span>
+                  <span>Sign In to dwellio</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
@@ -400,30 +499,24 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
               {/* Quick One-Click Demo Buttons */}
               <div className="space-y-2">
                 <span className="text-[11px] font-bold text-[#78756E] block text-center uppercase tracking-wider">
-                  Quick Demo Access
+                  Quick One-Click Client Login
                 </span>
                 <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemoLogin('cedar-house')}
-                    className="p-3 rounded-2xl bg-white hover:bg-[#FAF8F5] border border-black/5 text-left transition-all group shadow-soft-sm active:scale-95"
-                  >
-                    <div className="text-xs font-bold text-[#1C1B18] group-hover:text-[#2A4436]">
-                      Cedar House
-                    </div>
-                    <div className="text-[10px] text-[#78756E] mt-0.5">Tahoe City · Sarah</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemoLogin('pine-crest-villa')}
-                    className="p-3 rounded-2xl bg-white hover:bg-[#FAF8F5] border border-black/5 text-left transition-all group shadow-soft-sm active:scale-95"
-                  >
-                    <div className="text-xs font-bold text-[#1C1B18] group-hover:text-[#2A4436]">
-                      Pine Crest
-                    </div>
-                    <div className="text-[10px] text-[#78756E] mt-0.5">Blue Ridge · David</div>
-                  </button>
+                  {clients.slice(0, 2).map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => handleQuickDemoLogin(c.email)}
+                      className="p-3 rounded-2xl bg-white hover:bg-[#FAF8F5] border border-black/5 text-left transition-all group shadow-soft-sm active:scale-95"
+                    >
+                      <div className="text-xs font-bold text-[#1C1B18] group-hover:text-[#2A4436] truncate">
+                        {c.name}
+                      </div>
+                      <div className="text-[10px] text-[#78756E] mt-0.5 truncate">
+                        {c.assignedPropertySlugs.length} assigned stays
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -432,9 +525,9 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
             <div className="pt-4 text-center flex items-center justify-center gap-4 text-xs text-[#78756E]">
               <button
                 onClick={onNavigateToAdmin}
-                className="hover:text-[#1C1B18] underline underline-offset-2 transition-colors"
+                className="hover:text-[#1C1B18] underline underline-offset-2 transition-colors font-medium"
               >
-                Admin Console
+                Admin Console (/admin)
               </button>
               <span>·</span>
               <button
@@ -451,7 +544,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   }
 
   // =========================================================
-  // VIEW 2: AUTHENTICATED MOBILE-FOCUSED HOST DASHBOARD
+  // VIEW 2: AUTHENTICATED CLIENT DASHBOARD (SCOPED TO ASSIGNED PROPERTIES)
   // =========================================================
   return (
     <div className="h-[100dvh] w-full bg-[#ECE8E1] text-[#1C1B18] flex flex-col items-center justify-center overflow-hidden selection:bg-[#2A4436]/20">
@@ -470,8 +563,8 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         {/* 1. Pinned Top App Bar */}
         <header className="shrink-0 z-30 bg-white/95 backdrop-blur-md border-b border-black/5 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-[#EBF2EC] text-[#2A4436] flex items-center justify-center shrink-0">
-              <Building2 className="w-4 h-4 stroke-[2]" />
+            <div className="w-8 h-8 rounded-xl bg-[#2A4436] text-white flex items-center justify-center shrink-0 font-serif font-bold text-sm">
+              d
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
@@ -479,597 +572,626 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   {name}
                 </h1>
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#EBF2EC] text-[#2A4436] shrink-0">
-                  Host
+                  dwellio
                 </span>
               </div>
               <p className="text-[11px] text-[#78756E] truncate leading-tight">
-                {location}
+                {session.name} · {location}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Property Selector */}
-            <select
-              value={currentSlug}
-              onChange={(e) => {
-                setCurrentSlug(e.target.value);
-                const targetProp = getPropertyBySlug(e.target.value);
-                const newSession = { slug: targetProp.slug, hostName: targetProp.host.name };
-                setSession(newSession);
-                sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
-              }}
-              className="text-xs font-semibold text-[#1C1B18] bg-[#F6F4F0] hover:bg-[#ECE8E1] border border-black/10 px-2 py-1.5 rounded-xl focus:outline-none cursor-pointer max-w-[110px] truncate"
-            >
-              {propertyList.map((p) => (
-                <option key={p.slug} value={p.slug}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            {/* Property Selector: ONLY lists properties assigned to this client! */}
+            {clientProperties.length > 1 && (
+              <select
+                value={currentSlug}
+                onChange={(e) => setCurrentSlug(e.target.value)}
+                className="text-xs font-semibold text-[#1C1B18] bg-[#F6F4F0] hover:bg-[#ECE8E1] border border-black/10 px-2 py-1.5 rounded-xl focus:outline-none cursor-pointer max-w-[110px] truncate"
+              >
+                {clientProperties.map((p) => (
+                  <option key={p.slug} value={p.slug}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            )}
 
             {/* View Guest App */}
-            <button
-              onClick={() => onNavigateToGuest(currentSlug)}
-              className="p-2 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white active:scale-95 transition-all"
-              title="Open Guest App"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-            </button>
+            {clientProperties.length > 0 && (
+              <button
+                onClick={() => onNavigateToGuest(currentSlug)}
+                className="p-2 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white active:scale-95 transition-all"
+                title="Open Guest App"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+            )}
 
             {/* Logout */}
             <button
               onClick={handleLogout}
               className="p-2 rounded-xl text-[#78756E] hover:text-[#1C1B18] hover:bg-black/5 transition-colors"
-              title="Sign out"
+              title="Sign out of dwellio"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
         </header>
 
-        {/* 2. Scrollable Viewport (Never locks scrolling!) */}
-        <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-4 pb-28">
+        {/* 2. Scrollable Viewport */}
+        {clientProperties.length === 0 ? (
+          /* Empty State: No Properties Assigned to this Client */
+          <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-8 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center">
+              <Building2 className="w-8 h-8 stroke-[1.8]" />
+            </div>
+            <div className="space-y-1">
+              <h2 className="font-serif text-lg font-bold text-[#1C1B18]">
+                No Properties Assigned
+              </h2>
+              <p className="text-xs text-[#78756E] max-w-xs leading-relaxed">
+                Welcome, <strong>{session.name}</strong>! Your client account is active, but your administrator has not assigned any properties to you yet.
+              </p>
+            </div>
+            <div className="p-4 rounded-2xl bg-white border border-black/5 shadow-soft-sm text-xs text-[#5C5A55] max-w-xs text-left space-y-2">
+              <div className="font-bold text-[#1C1B18]">What to do:</div>
+              <p>
+                Please contact your dwellio administrator to assign your vacation rentals to <code>{session.email}</code>.
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="px-5 py-2.5 rounded-xl bg-[#2A4436] text-white text-xs font-semibold shadow-soft-sm"
+            >
+              Log Out
+            </button>
+          </main>
+        ) : (
+          <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-4 pb-28">
 
-          {/* ========================================================= */}
-          {/* TAB 1: GUEST STATUS & GUEST APP LINK */}
-          {/* ========================================================= */}
-          {activeTab === 'status' && (
-            <div className="space-y-4 animate-fade-in">
-              {/* Card 1: Are Guests Staying Right Now? */}
-              <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3.5">
-                <div>
+            {/* ========================================================= */}
+            {/* TAB 1: GUEST STATUS & GUEST APP LINK */}
+            {/* ========================================================= */}
+            {activeTab === 'status' && (
+              <div className="space-y-4 animate-fade-in">
+                {/* Card 1: Are Guests Staying Right Now? */}
+                <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3.5">
+                  <div>
+                    <span className="text-[11px] font-bold text-[#78756E] uppercase tracking-wider block">
+                      Guest Arrival Status
+                    </span>
+                    <h2 className="font-serif text-base font-bold text-[#1C1B18] mt-0.5">
+                      Are guests currently staying?
+                    </h2>
+                    <p className="text-xs text-[#78756E] mt-0.5">
+                      Switches your guest app between arrival welcome and checkout instructions.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateStayStatus('checked_in')}
+                      className={`p-3.5 rounded-2xl border text-left transition-all active:scale-[0.98] ${
+                        stayStatus === 'checked_in'
+                          ? 'bg-[#EBF2EC] border-[#2A4436] shadow-soft-sm'
+                          : 'bg-[#FAF8F5] border-black/5 hover:bg-[#F6F4F0]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg">🟢</span>
+                        {stayStatus === 'checked_in' && <Check className="w-4 h-4 text-[#2A4436]" />}
+                      </div>
+                      <div className="font-bold text-xs text-[#1C1B18] mt-2">Checked In</div>
+                      <div className="text-[11px] text-[#5C5A55] mt-0.5">Guests have arrived</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateStayStatus('checked_out')}
+                      className={`p-3.5 rounded-2xl border text-left transition-all active:scale-[0.98] ${
+                        stayStatus === 'checked_out'
+                          ? 'bg-[#F4EFE6] border-[#7A684D] shadow-soft-sm'
+                          : 'bg-[#FAF8F5] border-black/5 hover:bg-[#F6F4F0]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg">👋</span>
+                        {stayStatus === 'checked_out' && <Check className="w-4 h-4 text-[#7A684D]" />}
+                      </div>
+                      <div className="font-bold text-xs text-[#1C1B18] mt-2">Checked Out</div>
+                      <div className="text-[11px] text-[#5C5A55] mt-0.5">House turnover</div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Card 2: Guest App Share Link */}
+                <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3">
                   <span className="text-[11px] font-bold text-[#78756E] uppercase tracking-wider block">
-                    Guest Arrival Status
+                    Guest App Link
                   </span>
-                  <h2 className="font-serif text-base font-bold text-[#1C1B18] mt-0.5">
-                    Are guests currently staying?
-                  </h2>
-                  <p className="text-xs text-[#78756E] mt-0.5">
-                    Switches your guest app between arrival welcome and checkout instructions.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateStayStatus('checked_in')}
-                    className={`p-3.5 rounded-2xl border text-left transition-all active:scale-[0.98] ${
-                      stayStatus === 'checked_in'
-                        ? 'bg-[#EBF2EC] border-[#2A4436] shadow-soft-sm'
-                        : 'bg-[#FAF8F5] border-black/5 hover:bg-[#F6F4F0]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg">🟢</span>
-                      {stayStatus === 'checked_in' && <Check className="w-4 h-4 text-[#2A4436]" />}
+                  <div className="p-3 rounded-2xl bg-[#FAF8F5] border border-black/5 space-y-1">
+                    <span className="text-[11px] text-[#78756E] block">Share this link with your arriving guests:</span>
+                    <div className="font-mono text-xs font-semibold text-[#1C1B18] truncate">
+                      {guestUrl}
                     </div>
-                    <div className="font-bold text-xs text-[#1C1B18] mt-2">Checked In</div>
-                    <div className="text-[11px] text-[#5C5A55] mt-0.5">Guests have arrived</div>
-                  </button>
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateStayStatus('checked_out')}
-                    className={`p-3.5 rounded-2xl border text-left transition-all active:scale-[0.98] ${
-                      stayStatus === 'checked_out'
-                        ? 'bg-[#F4EFE6] border-[#7A684D] shadow-soft-sm'
-                        : 'bg-[#FAF8F5] border-black/5 hover:bg-[#F6F4F0]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg">👋</span>
-                      {stayStatus === 'checked_out' && <Check className="w-4 h-4 text-[#7A684D]" />}
-                    </div>
-                    <div className="font-bold text-xs text-[#1C1B18] mt-2">Checked Out</div>
-                    <div className="text-[11px] text-[#5C5A55] mt-0.5">House turnover</div>
-                  </button>
-                </div>
-              </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={copyGuestUrl}
+                      className="py-2.5 px-3 rounded-xl bg-white hover:bg-[#FAF8F5] border border-black/10 text-xs font-bold text-[#1C1B18] shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                    >
+                      {isCopiedLink ? <Check className="w-3.5 h-3.5 text-[#2A4436]" /> : <Copy className="w-3.5 h-3.5 text-[#78756E]" />}
+                      <span>{isCopiedLink ? 'Copied!' : 'Copy Link'}</span>
+                    </button>
 
-              {/* Card 2: Guest App Share Link */}
-              <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3">
-                <span className="text-[11px] font-bold text-[#78756E] uppercase tracking-wider block">
-                  Guest App Link
-                </span>
-                <div className="p-3 rounded-2xl bg-[#FAF8F5] border border-black/5 space-y-1">
-                  <span className="text-[11px] text-[#78756E] block">Share this link with your arriving guests:</span>
-                  <div className="font-mono text-xs font-semibold text-[#1C1B18] truncate">
-                    {guestUrl}
+                    <button
+                      type="button"
+                      onClick={() => onNavigateToGuest(currentSlug)}
+                      className="py-2.5 px-3 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <span>Open App</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={copyGuestUrl}
-                    className="py-2.5 px-3 rounded-xl bg-white hover:bg-[#FAF8F5] border border-black/10 text-xs font-bold text-[#1C1B18] shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5"
-                  >
-                    {isCopiedLink ? <Check className="w-3.5 h-3.5 text-[#2A4436]" /> : <Copy className="w-3.5 h-3.5 text-[#78756E]" />}
-                    <span>{isCopiedLink ? 'Copied!' : 'Copy Link'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => onNavigateToGuest(currentSlug)}
-                    className="py-2.5 px-3 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5"
-                  >
-                    <span>Open App</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Card 3: House Name & Photo */}
-              <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3.5">
-                <div className="border-b border-black/5 pb-2.5">
-                  <h3 className="font-serif text-sm font-bold text-[#1C1B18]">
-                    Property Basics
-                  </h3>
-                  <p className="text-[11px] text-[#78756E] mt-0.5">
-                    Basic information guests see in the app.
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
-                      House Name
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Cedar House"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs font-semibold text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
-                    />
+                {/* Card 3: House Name & Photo */}
+                <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3.5">
+                  <div className="border-b border-black/5 pb-2.5">
+                    <h3 className="font-serif text-sm font-bold text-[#1C1B18]">
+                      Property Basics
+                    </h3>
+                    <p className="text-[11px] text-[#78756E] mt-0.5">
+                      Basic information guests see in the app.
+                    </p>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
-                      Short Description / Tagline
-                    </label>
-                    <input
-                      type="text"
-                      value={tagline}
-                      onChange={(e) => setTagline(e.target.value)}
-                      placeholder="e.g. Modern Alpine Chalet & Forest Spa"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
-                      Cover Photo URL
-                    </label>
-                    <div className="flex gap-2">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                        House Name
+                      </label>
                       <input
                         type="text"
-                        value={heroImage}
-                        onChange={(e) => setHeroImage(e.target.value)}
-                        placeholder="https://..."
-                        className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="e.g. Cedar House"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs font-semibold text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
                       />
-                      {heroImage && (
-                        <img
-                          src={heroImage}
-                          alt="Cover"
-                          className="w-10 h-10 rounded-xl object-cover border border-black/10 shrink-0"
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                        Short Description / Tagline
+                      </label>
+                      <input
+                        type="text"
+                        value={tagline}
+                        onChange={(e) => setTagline(e.target.value)}
+                        placeholder="e.g. Modern Alpine Chalet & Forest Spa"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                        Cover Photo URL
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={heroImage}
+                          onChange={(e) => setHeroImage(e.target.value)}
+                          placeholder="https://..."
+                          className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
                         />
-                      )}
+                        {heroImage && (
+                          <img
+                            src={heroImage}
+                            alt="Cover"
+                            className="w-10 h-10 rounded-xl object-cover border border-black/10 shrink-0"
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <button
-                  type="button"
-                  onClick={handleSaveAll}
-                  className="w-full py-3 rounded-2xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-2"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Save Details</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================= */}
-          {/* TAB 2: ADDRESS & FRONT DOOR PIN */}
-          {/* ========================================================= */}
-          {activeTab === 'location' && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-2">
-                <span className="text-[11px] font-bold text-[#78756E] uppercase tracking-wider block">
-                  Location Setup
-                </span>
-                <h2 className="font-serif text-base font-bold text-[#1C1B18]">
-                  Address & Front Door Pin
-                </h2>
-                <p className="text-xs text-[#78756E] leading-relaxed">
-                  Type your address and set the pin right at your front door. When guests are out exploring, the guest app's <strong>"Return Home"</strong> button gives them turn-by-turn directions back to this exact pin.
-                </p>
-              </div>
-
-              {/* Simplified OsmLocationPicker */}
-              <OsmLocationPicker
-                coordinates={coordinates}
-                propertyName={name}
-                onChange={(coords) => {
-                  setCoordinates(coords);
-                  if (coords.address) {
-                    setLocation(coords.address.split(',')[0]);
-                  }
-                }}
-                onSave={(coords) => {
-                  setCoordinates(coords);
-                  if (coords.address) {
-                    setLocation(coords.address.split(',')[0]);
-                  }
-                  handleSaveAll();
-                }}
-              />
-            </div>
-          )}
-
-          {/* ========================================================= */}
-          {/* TAB 3: WI-FI, KEYS & HOUSE GUIDE */}
-          {/* ========================================================= */}
-          {activeTab === 'guide' && (
-            <div className="space-y-4 animate-fade-in">
-              {/* Wi-Fi & Keypad Section */}
-              <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-4">
-                <div className="border-b border-black/5 pb-2.5">
-                  <h3 className="font-serif text-sm font-bold text-[#1C1B18] flex items-center gap-2">
-                    <KeyRound className="w-4 h-4 text-[#2A4436]" />
-                    <span>Front Door & Wi-Fi</span>
-                  </h3>
-                  <p className="text-[11px] text-[#78756E] mt-0.5">
-                    Essential codes guests need when they arrive.
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
-                      Door Keypad Code
-                    </label>
-                    <input
-                      type="text"
-                      value={accessCode}
-                      onChange={(e) => setAccessCode(e.target.value)}
-                      placeholder="e.g. 4829"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs font-mono font-bold text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
-                      Door Instructions
-                    </label>
-                    <input
-                      type="text"
-                      value={doorInstruction}
-                      onChange={(e) => setDoorInstruction(e.target.value)}
-                      placeholder="e.g. Enter 4 digits on keypad and turn deadbolt clockwise"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
-                    />
-                  </div>
-
-                  <div className="pt-2 border-t border-black/5 grid grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
-                        Wi-Fi Name
-                      </label>
-                      <input
-                        type="text"
-                        value={wifiNetwork}
-                        onChange={(e) => setWifiNetwork(e.target.value)}
-                        placeholder="Network Name"
-                        className="w-full px-3 py-2 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
-                        Wi-Fi Password
-                      </label>
-                      <input
-                        type="text"
-                        value={wifiPassword}
-                        onChange={(e) => setWifiPassword(e.target.value)}
-                        placeholder="Password"
-                        className="w-full px-3 py-2 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
-                      />
-                    </div>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSaveAll}
+                    className="w-full py-3 rounded-2xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Save Details</span>
+                  </button>
                 </div>
               </div>
+            )}
 
-              {/* House Guide (Single Long Text Widget) */}
-              <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3">
-                <div className="border-b border-black/5 pb-2.5">
-                  <h3 className="font-serif text-sm font-bold text-[#1C1B18] flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-[#2A4436]" />
-                    <span>House Guide (Instructions)</span>
-                  </h3>
-                  <p className="text-[11px] text-[#78756E] mt-0.5">
-                    A simple text guide shown to guests for trash, heating, rules, etc.
-                  </p>
-                </div>
-
-                <textarea
-                  rows={8}
-                  value={houseGuideText}
-                  onChange={(e) => setHouseGuideText(e.target.value)}
-                  placeholder="Write your house rules, heating instructions, garbage day, and anything else guests should know..."
-                  className="w-full p-3.5 rounded-2xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] leading-relaxed focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all resize-y"
-                />
-
-                <span className="text-[10px] text-[#78756E] block">
-                  Guests can read this single guide anytime in their app under "House Guide".
-                </span>
-              </div>
-
-              {/* Host Contact Info */}
-              <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3">
-                <div className="border-b border-black/5 pb-2.5">
-                  <h3 className="font-serif text-sm font-bold text-[#1C1B18] flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-[#2A4436]" />
-                    <span>Host Contact</span>
-                  </h3>
-                  <p className="text-[11px] text-[#78756E] mt-0.5">
-                    How guests reach you for questions or emergencies.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
-                      Host Name
-                    </label>
-                    <input
-                      type="text"
-                      value={hostName}
-                      onChange={(e) => setHostName(e.target.value)}
-                      placeholder="e.g. Sarah Jenkins"
-                      className="w-full px-3 py-2 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
-                      Phone Number
-                    </label>
-                    <input
-                      type="text"
-                      value={hostPhone}
-                      onChange={(e) => setHostPhone(e.target.value)}
-                      placeholder="e.g. (555) 234-5678"
-                      className="w-full px-3 py-2 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleSaveAll}
-                  className="w-full py-3 rounded-2xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-2"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Save Guide & Wi-Fi</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================= */}
-          {/* TAB 4: LOCAL RECOMMENDATIONS */}
-          {/* ========================================================= */}
-          {activeTab === 'places' && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3">
-                <div>
+            {/* ========================================================= */}
+            {/* TAB 2: ADDRESS & FRONT DOOR PIN */}
+            {/* ========================================================= */}
+            {activeTab === 'location' && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-2">
                   <span className="text-[11px] font-bold text-[#78756E] uppercase tracking-wider block">
-                    Guest Recommendations
+                    Location Setup
                   </span>
-                  <h2 className="font-serif text-base font-bold text-[#1C1B18] mt-0.5">
-                    Nearby Food & Activities
+                  <h2 className="font-serif text-base font-bold text-[#1C1B18]">
+                    Address & Front Door Pin
                   </h2>
-                  <p className="text-xs text-[#78756E] mt-0.5">
-                    Automatically ranked by highest rating. Star places you personally recommend!
+                  <p className="text-xs text-[#78756E] leading-relaxed">
+                    Type your address and set the pin right at your front door. When guests are out exploring, the guest app's <strong>"Return Home"</strong> button gives them turn-by-turn directions back to this exact pin.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={handleFindNearbyPlaces}
-                    disabled={isFetchingPlaces}
-                    className="py-2.5 px-3 rounded-xl bg-[#EBF2EC] hover:bg-[#DCEDE0] text-[#2A4436] text-xs font-bold border border-[#2A4436]/20 shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isFetchingPlaces ? 'animate-spin' : ''}`} />
-                    <span>{isFetchingPlaces ? 'Finding...' : 'Find Nearby Spots'}</span>
-                  </button>
+                {/* Simplified OsmLocationPicker */}
+                <OsmLocationPicker
+                  coordinates={coordinates}
+                  propertyName={name}
+                  onChange={(coords) => {
+                    setCoordinates(coords);
+                    if (coords.address) {
+                      setLocation(coords.address.split(',')[0]);
+                    }
+                  }}
+                  onSave={(coords) => {
+                    setCoordinates(coords);
+                    if (coords.address) {
+                      setLocation(coords.address.split(',')[0]);
+                    }
+                    handleSaveAll();
+                  }}
+                />
+              </div>
+            )}
 
-                  <button
-                    type="button"
-                    onClick={() => setIsAddingPlace(!isAddingPlace)}
-                    className="py-2.5 px-3 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Custom Spot</span>
-                  </button>
-                </div>
+            {/* ========================================================= */}
+            {/* TAB 3: WI-FI, KEYS & HOUSE GUIDE */}
+            {/* ========================================================= */}
+            {activeTab === 'guide' && (
+              <div className="space-y-4 animate-fade-in">
+                {/* Wi-Fi & Keypad Section */}
+                <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-4">
+                  <div className="border-b border-black/5 pb-2.5">
+                    <h3 className="font-serif text-sm font-bold text-[#1C1B18] flex items-center gap-2">
+                      <KeyRound className="w-4 h-4 text-[#2A4436]" />
+                      <span>Front Door & Wi-Fi</span>
+                    </h3>
+                    <p className="text-[11px] text-[#78756E] mt-0.5">
+                      Essential codes guests need when they arrive.
+                    </p>
+                  </div>
 
-                {/* Add Custom Spot Form */}
-                {isAddingPlace && (
-                  <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-black/5 space-y-2.5 mt-2 animate-fade-in">
-                    <span className="text-xs font-bold text-[#1C1B18] block">Add Favorite Spot</span>
-                    <input
-                      type="text"
-                      value={newPlaceName}
-                      onChange={(e) => setNewPlaceName(e.target.value)}
-                      placeholder="Spot Name (e.g., West Shore Cafe)"
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-black/10 text-xs text-[#1C1B18] focus:outline-none"
-                    />
-                    <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                        Door Keypad Code
+                      </label>
                       <input
                         type="text"
-                        value={newPlaceType}
-                        onChange={(e) => setNewPlaceType(e.target.value)}
-                        placeholder="Type (e.g. Artisan Bakery)"
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-black/10 text-xs text-[#1C1B18] focus:outline-none"
-                      />
-                      <input
-                        type="text"
-                        value={newPlaceAddress}
-                        onChange={(e) => setNewPlaceAddress(e.target.value)}
-                        placeholder="Distance (e.g. 5 mins walk)"
-                        className="w-full px-3 py-2 rounded-xl bg-white border border-black/10 text-xs text-[#1C1B18] focus:outline-none"
+                        value={accessCode}
+                        onChange={(e) => setAccessCode(e.target.value)}
+                        placeholder="e.g. 4829"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs font-mono font-bold text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
                       />
                     </div>
-                    <div className="flex justify-end gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => setIsAddingPlace(false)}
-                        className="px-3 py-1.5 text-xs text-[#78756E] hover:text-[#1C1B18]"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleAddCustomPlace}
-                        className="px-3 py-1.5 rounded-xl bg-[#2A4436] text-white text-xs font-bold shadow-soft-sm"
-                      >
-                        Add Spot
-                      </button>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                        Door Instructions
+                      </label>
+                      <input
+                        type="text"
+                        value={doorInstruction}
+                        onChange={(e) => setDoorInstruction(e.target.value)}
+                        placeholder="e.g. Enter 4 digits on keypad and turn deadbolt"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+                      />
+                    </div>
+
+                    <div className="pt-2 border-t border-black/5 grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                          Wi-Fi Name
+                        </label>
+                        <input
+                          type="text"
+                          value={wifiNetwork}
+                          onChange={(e) => setWifiNetwork(e.target.value)}
+                          placeholder="Network Name"
+                          className="w-full px-3 py-2 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                          Wi-Fi Password
+                        </label>
+                        <input
+                          type="text"
+                          value={wifiPassword}
+                          onChange={(e) => setWifiPassword(e.target.value)}
+                          placeholder="Password"
+                          className="w-full px-3 py-2 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+                        />
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Places List */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-[11px] font-bold text-[#78756E] uppercase tracking-wider">
-                    {recommendations.length} Recommended Places
+                {/* House Guide (Single Long Text Widget) */}
+                <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3">
+                  <div className="border-b border-black/5 pb-2.5">
+                    <h3 className="font-serif text-sm font-bold text-[#1C1B18] flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-[#2A4436]" />
+                      <span>House Guide (Instructions)</span>
+                    </h3>
+                    <p className="text-[11px] text-[#78756E] mt-0.5">
+                      A simple text guide shown to guests for trash, heating, rules, etc.
+                    </p>
+                  </div>
+
+                  <textarea
+                    rows={8}
+                    value={houseGuideText}
+                    onChange={(e) => setHouseGuideText(e.target.value)}
+                    placeholder="Write your house rules, heating instructions, garbage day, and anything else guests should know..."
+                    className="w-full p-3.5 rounded-2xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] leading-relaxed focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all resize-y"
+                  />
+
+                  <span className="text-[10px] text-[#78756E] block">
+                    Guests can read this single guide anytime in their app under "House Guide".
                   </span>
-                  <span className="text-[10px] text-[#78756E]">Highest rated first</span>
                 </div>
 
-                {recommendations.map((rec) => (
-                  <div
-                    key={rec.id}
-                    className="p-3.5 rounded-2xl bg-white border border-black/5 shadow-soft-sm space-y-1.5 hover:shadow-soft-card transition-all"
+                {/* Host Contact Info */}
+                <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3">
+                  <div className="border-b border-black/5 pb-2.5">
+                    <h3 className="font-serif text-sm font-bold text-[#1C1B18] flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-[#2A4436]" />
+                      <span>Host Contact</span>
+                    </h3>
+                    <p className="text-[11px] text-[#78756E] mt-0.5">
+                      How guests reach you for questions or emergencies.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                        Host Name
+                      </label>
+                      <input
+                        type="text"
+                        value={hostName}
+                        onChange={(e) => setHostName(e.target.value)}
+                        placeholder="e.g. Sarah Jenkins"
+                        className="w-full px-3 py-2 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                        Phone Number
+                      </label>
+                      <input
+                        type="text"
+                        value={hostPhone}
+                        onChange={(e) => setHostPhone(e.target.value)}
+                        placeholder="e.g. (555) 234-5678"
+                        className="w-full px-3 py-2 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleSaveAll}
+                    className="w-full py-3 rounded-2xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-2"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h4 className="font-bold text-xs text-[#1C1B18] truncate">
-                            {rec.name}
-                          </h4>
-                          {rec.isStarred && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                              ★ Host Pick
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-[11px] text-[#78756E] mt-0.5 truncate">
-                          {rec.type} · {rec.distance}
-                        </div>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Save Guide & Wi-Fi</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================= */}
+            {/* TAB 4: LOCAL RECOMMENDATIONS */}
+            {/* ========================================================= */}
+            {activeTab === 'places' && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3">
+                  <div>
+                    <span className="text-[11px] font-bold text-[#78756E] uppercase tracking-wider block">
+                      Guest Recommendations
+                    </span>
+                    <h2 className="font-serif text-base font-bold text-[#1C1B18] mt-0.5">
+                      Nearby Food & Activities
+                    </h2>
+                    <p className="text-xs text-[#78756E] mt-0.5">
+                      Automatically ranked by highest rating. Star places you personally recommend!
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={handleFindNearbyPlaces}
+                      disabled={isFetchingPlaces}
+                      className="py-2.5 px-3 rounded-xl bg-[#EBF2EC] hover:bg-[#DCEDE0] text-[#2A4436] text-xs font-bold border border-[#2A4436]/20 shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isFetchingPlaces ? 'animate-spin' : ''}`} />
+                      <span>{isFetchingPlaces ? 'Finding...' : 'Find Nearby Spots'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingPlace(!isAddingPlace)}
+                      className="py-2.5 px-3 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Custom Spot</span>
+                    </button>
+                  </div>
+
+                  {/* Add Custom Spot Form */}
+                  {isAddingPlace && (
+                    <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-black/5 space-y-2.5 mt-2 animate-fade-in">
+                      <span className="text-xs font-bold text-[#1C1B18] block">Add Favorite Spot</span>
+                      <input
+                        type="text"
+                        value={newPlaceName}
+                        onChange={(e) => setNewPlaceName(e.target.value)}
+                        placeholder="Spot Name (e.g., West Shore Cafe)"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-black/10 text-xs text-[#1C1B18] focus:outline-none"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={newPlaceType}
+                          onChange={(e) => setNewPlaceType(e.target.value)}
+                          placeholder="Type (e.g. Artisan Bakery)"
+                          className="w-full px-3 py-2 rounded-xl bg-white border border-black/10 text-xs text-[#1C1B18] focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={newPlaceAddress}
+                          onChange={(e) => setNewPlaceAddress(e.target.value)}
+                          placeholder="Distance (e.g. 5 mins walk)"
+                          className="w-full px-3 py-2 rounded-xl bg-white border border-black/10 text-xs text-[#1C1B18] focus:outline-none"
+                        />
                       </div>
-
-                      <div className="flex items-center gap-1 shrink-0">
-                        {/* Rating */}
-                        <span className="text-xs font-bold text-[#1C1B18] bg-[#F6F4F0] px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                          <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                          <span>{rec.rating.toFixed(1)}</span>
-                        </span>
-
-                        {/* Star Button */}
+                      <div className="flex justify-end gap-2 pt-1">
                         <button
                           type="button"
-                          onClick={() => handleToggleStar(rec.id)}
-                          className={`p-1.5 rounded-lg border transition-all ${
-                            rec.isStarred
-                              ? 'bg-amber-50 border-amber-200 text-amber-600'
-                              : 'bg-[#F6F4F0] border-black/5 text-[#78756E] hover:text-[#1C1B18]'
-                          }`}
-                          title="Star as Host Favorite"
+                          onClick={() => setIsAddingPlace(false)}
+                          className="px-3 py-1.5 text-xs text-[#78756E] hover:text-[#1C1B18]"
                         >
-                          <Star className={`w-3.5 h-3.5 ${rec.isStarred ? 'fill-amber-500 text-amber-500' : ''}`} />
+                          Cancel
                         </button>
-
-                        {/* Delete Button */}
                         <button
                           type="button"
-                          onClick={() => handleRemovePlace(rec.id)}
-                          className="p-1.5 rounded-lg text-[#78756E] hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                          title="Remove spot"
+                          onClick={handleAddCustomPlace}
+                          className="px-3 py-1.5 rounded-xl bg-[#2A4436] text-white text-xs font-bold shadow-soft-sm"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          Add Spot
                         </button>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+                  )}
+                </div>
 
-        </main>
+                {/* Places List */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[11px] font-bold text-[#78756E] uppercase tracking-wider">
+                      {recommendations.length} Recommended Places
+                    </span>
+                    <span className="text-[10px] text-[#78756E]">Highest rated first</span>
+                  </div>
+
+                  {recommendations.map((rec) => (
+                    <div
+                      key={rec.id}
+                      className="p-3.5 rounded-2xl bg-white border border-black/5 shadow-soft-sm space-y-1.5 hover:shadow-soft-card transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="font-bold text-xs text-[#1C1B18] truncate">
+                              {rec.name}
+                            </h4>
+                            {rec.isStarred && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                                ★ Host Pick
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-[#78756E] mt-0.5 truncate">
+                            {rec.type} · {rec.distance}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          {/* Rating */}
+                          <span className="text-xs font-bold text-[#1C1B18] bg-[#F6F4F0] px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                            <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                            <span>{rec.rating.toFixed(1)}</span>
+                          </span>
+
+                          {/* Star Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStar(rec.id)}
+                            className={`p-1.5 rounded-lg border transition-all ${
+                              rec.isStarred
+                                ? 'bg-amber-50 border-amber-200 text-amber-600'
+                                : 'bg-[#F6F4F0] border-black/5 text-[#78756E] hover:text-[#1C1B18]'
+                            }`}
+                            title="Star as Host Favorite"
+                          >
+                            <Star className={`w-3.5 h-3.5 ${rec.isStarred ? 'fill-amber-500 text-amber-500' : ''}`} />
+                          </button>
+
+                          {/* Delete Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePlace(rec.id)}
+                            className="p-1.5 rounded-lg text-[#78756E] hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            title="Remove spot"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </main>
+        )}
 
         {/* 3. Pinned Mobile Bottom Navigation Bar (App-like feel) */}
-        <nav className="shrink-0 bg-white/95 backdrop-blur-md border-t border-black/5 px-2 py-2 flex items-center justify-around z-30 safe-bottom">
-          {[
-            { id: 'status' as const, label: 'Status', icon: Home },
-            { id: 'location' as const, label: 'Location', icon: MapPin },
-            { id: 'guide' as const, label: 'Guide & Wi-Fi', icon: BookOpen },
-            { id: 'places' as const, label: 'Places', icon: Utensils },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all cursor-pointer ${
-                  isActive
-                    ? 'text-[#2A4436] font-bold'
-                    : 'text-[#78756E] font-medium hover:text-[#1C1B18]'
-                }`}
-              >
-                <div className={`p-1 rounded-xl transition-all ${
-                  isActive ? 'bg-[#EBF2EC]' : ''
-                }`}>
-                  <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.4]' : 'stroke-[1.8]'}`} />
-                </div>
-                <span className="text-[10px] mt-0.5">{tab.label}</span>
-              </button>
-            );
-          })}
-        </nav>
+        {clientProperties.length > 0 && (
+          <nav className="shrink-0 bg-white/95 backdrop-blur-md border-t border-black/5 px-2 py-2 flex items-center justify-around z-30 safe-bottom">
+            {[
+              { id: 'status' as const, label: 'Status', icon: Home },
+              { id: 'location' as const, label: 'Location', icon: MapPin },
+              { id: 'guide' as const, label: 'Guide & Wi-Fi', icon: BookOpen },
+              { id: 'places' as const, label: 'Places', icon: Utensils },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all cursor-pointer ${
+                    isActive
+                      ? 'text-[#2A4436] font-bold'
+                      : 'text-[#78756E] font-medium hover:text-[#1C1B18]'
+                  }`}
+                >
+                  <div className={`p-1 rounded-xl transition-all ${
+                    isActive ? 'bg-[#EBF2EC]' : ''
+                  }`}>
+                    <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.4]' : 'stroke-[1.8]'}`} />
+                  </div>
+                  <span className="text-[10px] mt-0.5">{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        )}
       </div>
     </div>
   );

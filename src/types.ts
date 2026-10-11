@@ -108,3 +108,12 @@ export interface ChatMessage {
   isError?: boolean;
   copiedText?: string;
 }
+
+export interface ClientAccount {
+  id: string;
+  name: string;
+  email: string;
+  passcode: string;
+  assignedPropertySlugs: string[];
+  createdAt: string;
+}
