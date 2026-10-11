@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #F6F4F0;
+  color: #1C1B18;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS input zoom prevention: Form controls must have at least 16px font-size to prevent automatic Safari zoom */
+input, textarea, select {
+  font-size: 16px !important;
+  touch-action: manipulation;
+}
+
+/* Custom modern scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Hero warm interior ambient background header */
+.hero-ambient-header {
+  background-image: 
+    linear-gradient(to bottom, rgba(246, 244, 240, 0.1) 0%, rgba(246, 244, 240, 0.85) 60%, rgba(246, 244, 240, 1) 100%),
+    url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80');
+  background-size: cover;
+  background-position: center 25%;
+}
+
+/* Safe area insets for mobile Safari and Android chrome */
+.safe-bottom {
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+}
+
+.safe-top {
+  padding-top: max(12px, env(safe-area-inset-top, 12px));
+}
+
+/* Native screen slide transitions */
+@keyframes screenSlideInRight {
+  from {
+    opacity: 0.85;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-screen-in {
+  animation: screenSlideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes screenSlideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(25px);
+  }
+}
+
+.animate-screen-out {
+  animation: screenSlideOutRight 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
