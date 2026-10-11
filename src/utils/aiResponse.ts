@@ -1,4 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
 import { PropertyData, ChatMessage } from '../types';
 
 interface GenerateResponseOptions {
@@ -8,103 +7,8 @@ interface GenerateResponseOptions {
   isAudioMessage?: boolean;
 }
 
-// Read API key from Vite environment variable (or fallback to provided key)
-const apiKey =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) ||
-  'AIzaSyDeIiDslnnwBf1L9IXJC16UzPgJS54ys98';
-
-let genAIClient: GoogleGenAI | null = null;
-function getClient(): GoogleGenAI {
-  if (!genAIClient) {
-    genAIClient = new GoogleGenAI({ apiKey });
-  }
-  return genAIClient;
-}
-
 /**
- * Builds a concise, context-rich system instruction for the property.
- */
-function buildSystemInstruction(property: PropertyData): string {
-  const recsSummary = property.recommendations
-    .map(
-      (r) =>
-        `- ${r.name} (${r.type}, ${r.distance}): ${r.description} (Highlight: ${r.highlight}, Rating: ${r.rating})`
-    )
-    .join('\n');
-
-  const contactsSummary = property.emergencyContacts
-    .map((c) => `- ${c.label} (${c.name}): ${c.number} - ${c.description}`)
-    .join('\n');
-
-  return `You are "${property.assistantName}", the warm, hospitable, and knowledgeable AI guest concierge for "${property.name}" located in "${property.location}".
-
-PROPERTY DETAILS:
-- Tagline: ${property.tagline}
-- Host: ${property.host.name} (${property.host.phoneFormatted}, Superhost: ${property.host.superhost}, Avg response: ${property.host.responseTime})
-- Emergency Phone: ${property.host.emergencyPhone}
-- Wi-Fi: Network "${property.wifi.network}", Password "${property.wifi.password}"
-- Check-in: Standard check-in time is ${property.checkIn.time}. Lock system is "${property.checkIn.lockType}". Door keypad code is "${property.checkIn.accessCode}".
-- Door instructions: ${property.checkIn.doorInstructions.join(' | ')}
-- Parking: ${property.checkIn.parkingInfo}
-- EV Charger: ${property.checkIn.evCharger}
-- Emergency Lockbox: ${property.checkIn.emergencyKeybox}
-- Early Check-in Policy: ${property.checkIn.earlyCheckInPolicy}
-
-HOUSE RULES & GUIDE:
-- Rules: ${property.houseRules.join('; ')}
-- House manual:
-${property.houseGuideText}
-
-RECOMMENDATIONS:
-${recsSummary}
-
-EMERGENCY CONTACTS:
-${contactsSummary}
-
-AVAILABLE IN-APP SCREEN SHORTCUTS (use these in actionChips when relevant):
-- "open_wifi": Opens the full Wi-Fi details screen with QR code
-- "open_checkin": Opens the step-by-step entry guide and parking details
-- "open_guide": Opens the complete house guide manual
-- "open_host": Opens host contact details
-- "open_call": Opens emergency dialer
-- "open_play": Opens the cabin games lobby (Truth or Dare & Never Have I Ever)
-- "open_recommendations": Opens local dining, coffee & outdoor recommendations
-
-INSTRUCTIONS FOR YOUR RESPONSE:
-1. Speak in a hospitable, helpful, and concise tone appropriate for a luxury short-term rental concierge.
-2. Format your response with clean markdown (bold key phrases, bullet points when listing steps, backticks for codes or wifi passwords).
-3. Always return your answer as a JSON object with:
-   {
-     "reply": "string (your markdown formatted answer to the guest)",
-     "actionChips": [
-       { "label": "Short button label with emoji (e.g. 📶 Wi-Fi Details)", "prompt": "Follow-up question or action", "action": "open_screen_action_if_applicable" }
-     ],
-     "copiedText": "string (optional: code or password if guest asked for key code or wifi password, else omit or empty)"
-   }
-4. Provide 1 to 3 relevant actionChips to help the guest navigate smoothly.
-5. If the guest mentions games, bored, activities, or Truth or Dare / Never Have I Ever, recommend the games and include the "open_play" action.
-6. Keep replies concise, accurate, and specific to ${property.name}.
-`;
-}
-
-/**
- * Converts a data URL (e.g. data:image/jpeg;base64,...) to inlineData part.
- */
-function parseDataUrlToPart(dataUrl: string): { inlineData: { mimeType: string; data: string } } | null {
-  const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
-  if (match) {
-    return {
-      inlineData: {
-        mimeType: match[1],
-        data: match[2],
-      },
-    };
-  }
-  return null;
-}
-
-/**
- * Fallback response generator in case of network offline or API rate-limit.
+ * Fallback response generator in case of network offline, server failure, or rate-limit.
  */
 function getOfflineFallbackResponse(
   messageText: string,
@@ -144,7 +48,13 @@ function getOfflineFallbackResponse(
     };
   }
 
-  if (query.includes('door') || query.includes('code') || query.includes('check in') || query.includes('check-in') || query.includes('key')) {
+  if (
+    query.includes('door') ||
+    query.includes('code') ||
+    query.includes('check in') ||
+    query.includes('check-in') ||
+    query.includes('key')
+  ) {
     return {
       id,
       sender: 'assistant',
@@ -174,7 +84,9 @@ function getOfflineFallbackResponse(
 }
 
 /**
- * Main AI response generator using Gemini 3.1 Flash-Lite (model: gemini-3.1-flash-lite).
+ * Main AI response generator.
+ * Calls the secure server-side Netlify Function at `/.netlify/functions/ai-response`.
+ * The function securely uses GEMINI_API_KEY without exposing secrets to the client.
  */
 export async function generateAssistantResponse({
   messageText,
@@ -186,113 +98,46 @@ export async function generateAssistantResponse({
   const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   try {
-    const client = getClient();
-    const systemInstruction = buildSystemInstruction(property);
-
-    // Prepare content parts
-    const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
-
-    // Multimodal image attachment
-    if (image?.url) {
-      const inlinePart = parseDataUrlToPart(image.url);
-      if (inlinePart) {
-        parts.push(inlinePart);
-      }
-    }
-
-    // User query prompt
-    let userPrompt = messageText;
-    if (image?.caption && !userPrompt.includes(image.caption)) {
-      userPrompt = `[Attached photo: ${image.caption}] ${userPrompt}`.trim();
-    }
-    if (isAudioMessage && !userPrompt) {
-      userPrompt = 'The guest just sent a voice message asking for help with their stay.';
-    }
-    if (!userPrompt.trim()) {
-      userPrompt = 'Hello! What can you help me with during my stay?';
-    }
-
-    parts.push({ text: userPrompt });
-
-    // Call gemini-3.1-flash-lite with Google GenAI SDK
-    const response = await client.models.generateContent({
-      model: 'gemini-3.1-flash-lite',
-      contents: [
-        {
-          role: 'user',
-          parts: parts as any,
-        },
-      ],
-      config: {
-        systemInstruction,
-        responseMimeType: 'application/json',
+    const response = await fetch('/.netlify/functions/ai-response', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        messageText,
+        property,
+        image,
+        isAudioMessage,
+      }),
     });
 
-    const responseText = response.text || '';
-    let parsed: {
-      reply?: string;
-      actionChips?: Array<{
-        label: string;
-        prompt: string;
-        action?: 'open_wifi' | 'open_checkin' | 'open_guide' | 'open_host' | 'open_call' | 'open_play' | 'open_recommendations';
-      }>;
-      copiedText?: string;
-    } = {};
-
-    try {
-      parsed = JSON.parse(responseText);
-    } catch {
-      // If JSON parsing fails, use the raw response text
-      parsed = { reply: responseText };
+    if (!response.ok) {
+      throw new Error(`Netlify Function error: HTTP ${response.status}`);
     }
 
-    const replyContent = parsed.reply || responseText || `I'm here to help with your stay at **${property.name}**!`;
+    const data = await response.json();
 
-    // Ensure action chips have valid actions if present
-    const validActions = new Set([
-      'open_wifi',
-      'open_checkin',
-      'open_guide',
-      'open_host',
-      'open_call',
-      'open_play',
-      'open_recommendations',
-    ]);
-
-    const formattedChips = (parsed.actionChips || [])
-      .filter((chip) => chip && chip.label && chip.prompt)
-      .map((chip) => ({
-        label: chip.label,
-        prompt: chip.prompt,
-        action: chip.action && validActions.has(chip.action) ? chip.action : undefined,
-      }));
-
-    // Auto-detect door code or wifi password in copiedText if not supplied
-    let copiedText = parsed.copiedText;
-    if (!copiedText) {
-      if (replyContent.includes(property.checkIn.accessCode)) {
-        copiedText = property.checkIn.accessCode;
-      } else if (replyContent.includes(property.wifi.password)) {
-        copiedText = property.wifi.password;
-      }
+    if (data.error && !data.reply) {
+      throw new Error(data.error);
     }
 
     return {
       id,
       sender: 'assistant',
       timestamp,
-      content: replyContent,
+      content: data.reply || `I'm here to help with your stay at **${property.name}**!`,
       hasAudioResponse: true,
-      copiedText,
-      actionChips: formattedChips.length > 0 ? formattedChips : [
-        { label: '🔑 Door Code', prompt: 'What is the door code?', action: 'open_checkin' },
-        { label: '📶 Wi-Fi Details', prompt: 'Show Wi-Fi details', action: 'open_wifi' },
-        { label: '🎲 Cabin Games', prompt: 'Open cabin games', action: 'open_play' },
-      ],
+      copiedText: data.copiedText || undefined,
+      actionChips: Array.isArray(data.actionChips) && data.actionChips.length > 0
+        ? data.actionChips
+        : [
+            { label: '🔑 Door Code', prompt: 'What is the door code?', action: 'open_checkin' },
+            { label: '📶 Wi-Fi Details', prompt: 'Show Wi-Fi details', action: 'open_wifi' },
+            { label: '🎲 Cabin Games', prompt: 'Open cabin games', action: 'open_play' },
+          ],
     };
   } catch (err) {
-    console.warn('Gemini 3.1 Flash-Lite API request error, falling back to local guide response:', err);
+    console.warn('ai-response function unavailable or failed, falling back to local guide response:', err);
     return getOfflineFallbackResponse(messageText, property, !!image);
   }
 }
