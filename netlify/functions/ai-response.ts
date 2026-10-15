@@ -81,16 +81,14 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-// Periodic cleanup of expired rate limit entries
-if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [ip, record] of rateLimitMap.entries()) {
-      if (now > record.resetAt) {
-        rateLimitMap.delete(ip);
-      }
+// Clean up expired rate limit entries inline (serverless-safe, no setInterval)
+function cleanupRateLimitMap(): void {
+  const now = Date.now();
+  for (const [ip, record] of rateLimitMap.entries()) {
+    if (now > record.resetAt) {
+      rateLimitMap.delete(ip);
     }
-  }, 5 * 60 * 1000);
+  }
 }
 
 function parseDataUrlToPart(dataUrl: string): { inlineData: { mimeType: string; data: string } } | null {
@@ -205,6 +203,7 @@ export default async function handler(req: Request, context: NetlifyContext): Pr
   }
 
   // Rate Limiting / Abuse Protection
+  cleanupRateLimitMap(); // serverless-safe inline cleanup
   const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || context.ip || 'anonymous';
   if (isRateLimited(clientIp)) {
     return new Response(
@@ -295,9 +294,9 @@ export default async function handler(req: Request, context: NetlifyContext): Pr
 
     parts.push({ text: userPrompt });
 
-    // Call gemini-3.1-flash-lite server-side
+    // Call gemini-2.5-flash-lite server-side (fast, cost-effective)
     const response = await aiClient.models.generateContent({
-      model: 'gemini-3.1-flash-lite',
+      model: 'gemini-2.5-flash-lite',
       contents: [
         {
           role: 'user',
