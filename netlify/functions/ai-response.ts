@@ -217,13 +217,18 @@ export default async function handler(req: Request, context: NetlifyContext): Pr
     );
   }
 
-  // Server-side environment variable exclusively
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Server-side environment variable (supports GEMINI_API_KEY, VITE_GEMINI_API_KEY, GOOGLE_API_KEY)
+  const apiKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.VITE_GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    process.env.GOOGLE_GENAI_API_KEY;
+
   if (!apiKey || apiKey.trim() === '') {
-    console.error('Server error: GEMINI_API_KEY environment variable is not configured.');
+    console.error('Server error: Gemini API key environment variable (GEMINI_API_KEY or VITE_GEMINI_API_KEY) is not configured.');
     return new Response(
       JSON.stringify({
-        error: 'Server configuration error: Gemini API key not set.',
+        error: 'Server configuration error: Gemini API key not set in environment.',
       }),
       {
         status: 500,
@@ -294,20 +299,38 @@ export default async function handler(req: Request, context: NetlifyContext): Pr
 
     parts.push({ text: userPrompt });
 
-    // Call gemini-2.5-flash-lite server-side (fast, cost-effective)
-    const response = await aiClient.models.generateContent({
-      model: 'gemini-2.5-flash-lite',
-      contents: [
-        {
-          role: 'user',
-          parts: parts as any,
+    // Call Gemini with model fallback (gemini-2.5-flash-lite -> gemini-2.5-flash)
+    let response: any;
+    try {
+      response = await aiClient.models.generateContent({
+        model: 'gemini-2.5-flash-lite',
+        contents: [
+          {
+            role: 'user',
+            parts: parts as any,
+          },
+        ],
+        config: {
+          systemInstruction,
+          responseMimeType: 'application/json',
         },
-      ],
-      config: {
-        systemInstruction,
-        responseMimeType: 'application/json',
-      },
-    });
+      });
+    } catch (modelErr: any) {
+      console.warn('gemini-2.5-flash-lite failed, attempting gemini-2.5-flash fallback:', modelErr?.message);
+      response = await aiClient.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [
+          {
+            role: 'user',
+            parts: parts as any,
+          },
+        ],
+        config: {
+          systemInstruction,
+          responseMimeType: 'application/json',
+        },
+      });
+    }
 
     const responseText = response.text || '';
     let parsed: {
@@ -378,6 +401,7 @@ export default async function handler(req: Request, context: NetlifyContext): Pr
     return new Response(
       JSON.stringify({
         error: 'Failed to generate AI response from Gemini model.',
+        details: err?.message || String(err),
       }),
       {
         status: 502,
