@@ -1,5 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
-import type { Context } from '@netlify/functions';
+
+export interface NetlifyContext {
+  ip?: string;
+  [key: string]: any;
+}
 
 interface RequestBody {
   messageText?: string;
@@ -31,6 +35,7 @@ interface RequestBody {
       earlyCheckInPolicy?: string;
     };
     houseGuideText?: string;
+    customAiInstructions?: string;
     houseRules?: string[];
     recommendations?: Array<{
       name?: string;
@@ -136,6 +141,9 @@ HOUSE RULES & GUIDE:
 - House manual:
 ${property.houseGuideText || ''}
 
+HOST'S SPECIFIC INSTRUCTIONS FOR DWELLIO AI CONCIERGE:
+${property.customAiInstructions?.trim() ? `"""\n${property.customAiInstructions.trim()}\n"""\nCRITICAL DIRECTIVE: You MUST strictly prioritize and adhere to the host's specific instructions above when answering guests!` : 'None provided by host. Follow standard hospitable guidelines.'}
+
 RECOMMENDATIONS:
 ${recsSummary}
 
@@ -168,7 +176,7 @@ INSTRUCTIONS FOR YOUR RESPONSE:
 `;
 }
 
-export default async function handler(req: Request, context: Context): Promise<Response> {
+export default async function handler(req: Request, context: NetlifyContext): Promise<Response> {
   // CORS Headers
   const corsHeaders: Record<string, string> = {
     'Access-Control-Allow-Origin': '*',

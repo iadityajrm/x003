@@ -46,7 +46,7 @@ export const HostContactScreen: React.FC<HostContactScreenProps> = ({
 
       <div className="p-4 sm:p-5 space-y-4">
         {/* Host Profile Card */}
-        <div className="p-4 rounded-2xl bg-white border border-black/5 shadow-soft-card flex items-center gap-3.5">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#1E1D1A] border border-black/5 dark:border-white/10 shadow-soft-card flex items-center gap-3.5 transition-colors">
           <img
             src={property.host.avatar}
             alt={property.host.name}
@@ -54,22 +54,22 @@ export const HostContactScreen: React.FC<HostContactScreenProps> = ({
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-base text-[#1C1B18] truncate">{property.host.name}</h3>
+              <h3 className="font-bold text-base text-[#1C1B18] dark:text-white truncate">{property.host.name}</h3>
               {property.host.superhost && (
-                <span className="flex items-center gap-1 text-[10px] font-semibold text-[#2A4436] bg-[#EBF2EC] border border-[#2A4436]/20 px-2 py-0.5 rounded-full shrink-0">
+                <span className="flex items-center gap-1 text-[10px] font-semibold text-[#2A4436] dark:text-[#78A88E] bg-[#EBF2EC] dark:bg-[#2A4436]/30 border border-[#2A4436]/20 dark:border-[#78A88E]/30 px-2 py-0.5 rounded-full shrink-0">
                   <ShieldCheck className="w-3 h-3" />
                   Superhost
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-3 text-xs text-[#78756E] mt-1">
+            <div className="flex items-center gap-3 text-xs text-[#78756E] dark:text-neutral-400 mt-1">
               <span className="flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                <strong className="text-[#1C1B18]">{property.host.rating}</strong>
+                <strong className="text-[#1C1B18] dark:text-white">{property.host.rating}</strong>
               </span>
               <span>·</span>
               <span className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-[#2A4436]" />
+                <Clock className="w-3.5 h-3.5 text-[#2A4436] dark:text-[#78A88E]" />
                 <span>Responds {property.host.responseTime}</span>
               </span>
             </div>
@@ -88,46 +88,46 @@ export const HostContactScreen: React.FC<HostContactScreenProps> = ({
 
           <a
             href={`sms:${property.host.phone}`}
-            className="flex items-center justify-center gap-2 p-3.5 rounded-xl bg-white hover:bg-[#FAF8F5] border border-black/10 text-[#1C1B18] font-semibold text-xs shadow-soft-sm active:scale-95 transition-all text-center"
+            className="flex items-center justify-center gap-2 p-3.5 rounded-xl bg-white dark:bg-[#1E1D1A] hover:bg-[#FAF8F5] dark:hover:bg-white/5 border border-black/10 dark:border-white/10 text-[#1C1B18] dark:text-white font-semibold text-xs shadow-soft-sm active:scale-95 transition-all text-center"
           >
-            <MessageSquare className="w-4 h-4 text-[#2A4436]" />
+            <MessageSquare className="w-4 h-4 text-[#2A4436] dark:text-[#78A88E]" />
             <span>Send SMS / Text</span>
           </a>
         </div>
 
         {/* Direct Phone Number Card */}
-        <div className="p-4 rounded-2xl bg-white border border-black/5 shadow-soft-sm flex items-center justify-between text-xs">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#1E1D1A] border border-black/5 dark:border-white/10 shadow-soft-sm flex items-center justify-between text-xs transition-colors">
           <div>
-            <span className="text-[11px] font-semibold text-[#78756E] uppercase tracking-wider block">Phone Number</span>
-            <strong className="text-sm text-[#1C1B18] font-mono mt-0.5 block">{property.host.phoneFormatted}</strong>
+            <span className="text-[11px] font-semibold text-[#78756E] dark:text-neutral-400 uppercase tracking-wider block">Phone Number</span>
+            <strong className="text-sm text-[#1C1B18] dark:text-white font-mono mt-0.5 block">{property.host.phoneFormatted}</strong>
           </div>
           <button
             onClick={handleCopyPhone}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#F6F4F0] hover:bg-[#ECE8E1] text-[#2A4436] font-semibold transition-all"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#F6F4F0] dark:bg-white/10 hover:bg-[#ECE8E1] dark:hover:bg-white/15 text-[#2A4436] dark:text-[#78A88E] font-semibold transition-all cursor-pointer"
           >
-            {copiedPhone ? <Check className="w-3.5 h-3.5 text-[#2A4436]" /> : <Copy className="w-3.5 h-3.5" />}
+            {copiedPhone ? <Check className="w-3.5 h-3.5 text-[#2A4436] dark:text-[#78A88E]" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedPhone ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
 
         {/* Direct Email Card */}
-        <div className="p-4 rounded-2xl bg-white border border-black/5 shadow-soft-sm flex items-center justify-between text-xs">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#1E1D1A] border border-black/5 dark:border-white/10 shadow-soft-sm flex items-center justify-between text-xs transition-colors">
           <div>
-            <span className="text-[11px] font-semibold text-[#78756E] uppercase tracking-wider block">Email Address</span>
-            <strong className="text-xs text-[#1C1B18] font-mono mt-0.5 block truncate max-w-[200px]">{property.host.email}</strong>
+            <span className="text-[11px] font-semibold text-[#78756E] dark:text-neutral-400 uppercase tracking-wider block">Email Address</span>
+            <strong className="text-xs text-[#1C1B18] dark:text-white font-mono mt-0.5 block truncate max-w-[200px]">{property.host.email}</strong>
           </div>
           <button
             onClick={handleCopyEmail}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#F6F4F0] hover:bg-[#ECE8E1] text-[#2A4436] font-semibold transition-all"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#F6F4F0] dark:bg-white/10 hover:bg-[#ECE8E1] dark:hover:bg-white/15 text-[#2A4436] dark:text-[#78A88E] font-semibold transition-all cursor-pointer"
           >
-            {copiedEmail ? <Check className="w-3.5 h-3.5 text-[#2A4436]" /> : <Mail className="w-3.5 h-3.5" />}
+            {copiedEmail ? <Check className="w-3.5 h-3.5 text-[#2A4436] dark:text-[#78A88E]" /> : <Mail className="w-3.5 h-3.5" />}
             <span>{copiedEmail ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
 
         {/* Emergency Assistance Notice */}
-        <div className="p-4 rounded-2xl bg-[#F6F4F0] border border-black/5 text-xs text-[#5C5A55] space-y-1">
-          <span className="font-bold text-[#1C1B18] block">Urgent On-Property Needs</span>
+        <div className="p-4 rounded-2xl bg-[#F6F4F0] dark:bg-[#1E1D1A] border border-black/5 dark:border-white/10 text-xs text-[#5C5A55] dark:text-neutral-300 space-y-1 transition-colors">
+          <span className="font-bold text-[#1C1B18] dark:text-white block">Urgent On-Property Needs</span>
           <p className="leading-relaxed">
             For urgent maintenance or lockout emergencies, you can reach {property.host.name} directly at {property.host.phoneFormatted} or dial 911 for emergency response.
           </p>

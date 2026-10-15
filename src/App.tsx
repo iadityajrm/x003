@@ -323,19 +323,25 @@ export function App() {
   const showComposer = currentScreen !== 'play';
 
   return (
-    <div className="h-[100dvh] w-full bg-[#ECE8E1] text-[#1C1B18] flex flex-col items-center justify-center overflow-hidden selection:bg-[#2A4436]/20 selection:text-[#1C1B18]">
+    <div className="h-[100dvh] w-full bg-[#ECE8E1] dark:bg-[#0D0C0A] text-[#1C1B18] dark:text-[#EDEAE4] flex flex-col items-center justify-center overflow-hidden selection:bg-[#2A4436]/20 selection:text-[#1C1B18]">
       {/* Mobile App Screen Frame - fixed viewport height, never scrolls off screen */}
-      <div className="w-full max-w-md h-[100dvh] flex flex-col bg-[#F6F4F0] shadow-2xl relative border-x border-black/5 overflow-hidden">
+      <div className="w-full max-w-md h-[100dvh] flex flex-col bg-[#F6F4F0] dark:bg-[#151412] shadow-2xl relative border-x border-black/5 dark:border-white/10 overflow-hidden transition-colors">
         
         {/* Pinned Header (Permanently pinned at top of the frame, never scrolls away) */}
         {(isHomeScreen || currentScreen === 'chat') && (
-          <div className="shrink-0 z-30 w-full bg-[#F6F4F0]/95 backdrop-blur-md">
+          <div className="shrink-0 z-30 w-full bg-[#F6F4F0]/95 dark:bg-[#1A1916]/95 backdrop-blur-md">
             <Header
               property={property}
               onOpenCall={() => navigateTo('call')}
               onOpenMenu={() => navigateTo('menu')}
               onOpenPropertySwitcher={() => navigateTo('switcher')}
-              onResetToHome={() => setCurrentScreen('home')}
+              onResetToHome={() => {
+                if (currentScreen === 'chat') {
+                  navigateBack();
+                } else {
+                  setCurrentScreen('home');
+                }
+              }}
               isChatMode={currentScreen === 'chat'}
             />
           </div>

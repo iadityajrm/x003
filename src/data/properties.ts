@@ -14,6 +14,7 @@ export const PROPERTIES: Record<string, PropertyData> = {
     heroImage: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80',
     doorImage: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80',
     assistantName: 'Cedar House Assistant',
+    customAiInstructions: 'Always emphasize Tahoe bear safety: remind guests never to leave food, coolers, or trash outside on the deck or in cars. Highlight that the cedar hot tub is preheated to 102°F. Maintain a warm, welcoming alpine host tone.',
     host: {
       name: 'Sarah Jenkins',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80',
@@ -180,6 +181,7 @@ We are delighted to have you stay at our Lake Tahoe forest sanctuary. Below is y
     heroImage: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1200&q=80',
     doorImage: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80',
     assistantName: 'Pine Crest Assistant',
+    customAiInstructions: 'Highlight the vintage arcade cabinet in the upper loft and recommend sunset mountain views from the jacuzzi deck. Remind guests that quiet hours start at 10 PM and outdoor open fires are prohibited.',
     host: {
       name: 'David Miller',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&h=200&q=80',
@@ -293,6 +295,7 @@ Experience the peaceful beauty of the Blue Ridge Mountains. Here is your quick r
     heroImage: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
     doorImage: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80',
     assistantName: 'Haven Assistant',
+    customAiInstructions: 'Remind guests to rinse off ocean sand at the heated outdoor shower before entering. Emphasize that the private beach gate code is 3341 and glass is strictly prohibited on the beach.',
     host: {
       name: 'Elena Vance',
       avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&h=200&q=80',

@@ -91,23 +91,23 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
     <div className="relative flex flex-col w-full max-w-md mx-auto px-5 pt-3 pb-32 z-10 space-y-3.5 sm:space-y-4">
       {/* Editorial Headline & Subtitle matching reference */}
       <div className="pt-2 pb-1 text-left">
-        <h1 className="font-serif text-[38px] sm:text-[42px] font-bold text-[#1C1B18] tracking-tight leading-[1.1]">
+        <h1 className="font-serif text-[38px] sm:text-[42px] font-bold text-[#1C1B18] dark:text-white drop-shadow-none dark:drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-tight leading-[1.1]">
           {greeting}
         </h1>
-        <p className="text-[15px] text-[#5C5A55] font-normal mt-1 leading-snug">
+        <p className="text-[15px] text-[#5C5A55] dark:text-white/90 drop-shadow-none dark:drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)] font-medium mt-1 leading-snug">
           Your stay, made easy.
         </p>
       </div>
 
       {/* Guest Stay Status Banner & Quick Action (Check In / Check Out) */}
-      <div className="bg-white rounded-[24px] p-4 shadow-soft-card border border-black/[0.03] flex items-center justify-between gap-3">
+      <div className="bg-white dark:bg-[#1E1D1A] rounded-[24px] p-4 shadow-soft-card border border-black/[0.04] dark:border-white/[0.08] flex items-center justify-between gap-3 transition-colors">
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
             stayStatus === 'checked_in'
-              ? 'bg-[#EBF2EC] text-[#2A4436]'
+              ? 'bg-[#EBF2EC] dark:bg-[#2A4436]/40 text-[#2A4436] dark:text-[#78A88E]'
               : stayStatus === 'checked_out'
-              ? 'bg-[#F4EFE6] text-[#7A684D]'
-              : 'bg-[#F6F4F0] text-[#5C5A55]'
+              ? 'bg-[#F4EFE6] dark:bg-[#7A684D]/30 text-[#7A684D] dark:text-[#D4C3A3]'
+              : 'bg-[#F6F4F0] dark:bg-white/10 text-[#5C5A55] dark:text-neutral-400'
           }`}>
             {stayStatus === 'checked_in' ? (
               <CheckCircle2 className="w-5 h-5 stroke-[2.2]" />
@@ -118,8 +118,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
             )}
           </div>
           <div>
-            <span className="text-[11px] font-semibold text-[#78756E] uppercase tracking-wider block">Stay Status</span>
-            <div className="text-sm font-bold text-[#1C1B18] capitalize">
+            <span className="text-[11px] font-semibold text-[#78756E] dark:text-neutral-400 uppercase tracking-wider block">Stay Status</span>
+            <div className="text-sm font-bold text-[#1C1B18] dark:text-white capitalize">
               {stayStatus === 'checked_in' ? 'Checked In' : stayStatus === 'checked_out' ? 'Checked Out' : 'Not Checked In'}
             </div>
           </div>
@@ -129,7 +129,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
           {stayStatus === 'not_checked_in' && (
             <button
               onClick={handleRequestCheckIn}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-semibold shadow-sm active:scale-95 transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-semibold shadow-sm active:scale-95 transition-all cursor-pointer"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>Check In</span>
@@ -139,7 +139,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
           {stayStatus === 'checked_in' && (
             <button
               onClick={handleRequestCheckOut}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#9E5A3F] hover:bg-[#864A32] text-white text-xs font-semibold shadow-sm active:scale-95 transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#9E5A3F] hover:bg-[#864A32] text-white text-xs font-semibold shadow-sm active:scale-95 transition-all cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Check Out</span>
@@ -149,7 +149,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
           {stayStatus === 'checked_out' && (
             <button
               onClick={handleRequestCheckIn}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#F6F4F0] hover:bg-[#ECE8E1] text-[#5C5A55] text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#F6F4F0] dark:bg-white/10 hover:bg-[#ECE8E1] dark:hover:bg-white/15 text-[#5C5A55] dark:text-neutral-200 text-xs font-semibold transition-colors cursor-pointer"
             >
               <span>Re-Check In</span>
             </button>
@@ -158,24 +158,24 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
       </div>
 
       {/* 1. Featured Hero Widget: Getting inside */}
-      <div className="bg-white rounded-[26px] p-4 sm:p-5 shadow-soft-card border border-black/[0.03] flex items-center justify-between gap-3 sm:gap-4 transition-all hover:shadow-soft-lg">
+      <div className="bg-white dark:bg-[#1E1D1A] rounded-[26px] p-4 sm:p-5 shadow-soft-card border border-black/[0.04] dark:border-white/[0.08] flex items-center justify-between gap-3 sm:gap-4 transition-all hover:shadow-soft-lg">
         {/* Left Column */}
         <div className="flex-1 flex flex-col justify-between min-h-[135px]">
           <div>
-            <div className="w-11 h-11 rounded-full bg-[#EBF2EC] text-[#2A4436] flex items-center justify-center mb-2.5">
+            <div className="w-11 h-11 rounded-full bg-[#EBF2EC] dark:bg-[#2A4436]/40 text-[#2A4436] dark:text-[#78A88E] flex items-center justify-center mb-2.5">
               <KeyRound className="w-5 h-5 stroke-[2.2]" />
             </div>
-            <h2 className="font-bold text-base sm:text-lg text-[#1C1B18] leading-tight">
+            <h2 className="font-bold text-base sm:text-lg text-[#1C1B18] dark:text-white leading-tight">
               Getting inside
             </h2>
-            <p className="text-xs sm:text-sm text-[#78756E] mt-0.5">
-              Keypad code: <strong className="text-[#1C1B18] font-mono">{property.checkIn.accessCode}</strong>
+            <p className="text-xs sm:text-sm text-[#78756E] dark:text-neutral-400 mt-0.5">
+              Doorstep entry & access instructions
             </p>
           </div>
 
           <button
             onClick={() => onOpenQuickModal('checkin')}
-            className="inline-flex items-center justify-center gap-2 bg-[#2A4436] hover:bg-[#20362B] active:scale-[0.98] text-white text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl transition-all shadow-sm w-fit mt-3"
+            className="inline-flex items-center justify-center gap-2 bg-[#2A4436] hover:bg-[#20362B] active:scale-[0.98] text-white text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl transition-all shadow-sm w-fit mt-3 cursor-pointer"
           >
             <span>View instructions</span>
             <ArrowRight className="w-4 h-4" />
@@ -185,7 +185,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
         {/* Right Column: Door photo */}
         <div 
           onClick={() => onOpenQuickModal('checkin')}
-          className="w-28 sm:w-32 h-36 sm:h-40 rounded-2xl overflow-hidden shrink-0 cursor-pointer group shadow-sm border border-black/5"
+          className="w-28 sm:w-32 h-36 sm:h-40 rounded-2xl overflow-hidden shrink-0 cursor-pointer group shadow-sm border border-black/5 dark:border-white/10"
         >
           <img
             src={property.doorImage || property.heroImage}
@@ -195,7 +195,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
         </div>
       </div>
 
-      {/* 2. Side-by-side Row: Wi-Fi & House Guide */}
+      {/* 2. Side-by-side Row: Wi-Fi & Play */}
       <div className="grid grid-cols-2 gap-3 sm:gap-3.5">
         {/* Wi-Fi Card */}
         <div
@@ -203,20 +203,20 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
           role="button"
           tabIndex={0}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenQuickModal('wifi'); }}
-          className="bg-white rounded-[24px] p-4 shadow-soft-card border border-black/[0.03] flex flex-col justify-between min-h-[118px] cursor-pointer hover:shadow-soft-lg active:scale-[0.98] transition-all text-left group select-none"
+          className="bg-white dark:bg-[#1E1D1A] rounded-[24px] p-4 shadow-soft-card border border-black/[0.04] dark:border-white/[0.08] flex flex-col justify-between min-h-[118px] cursor-pointer hover:shadow-soft-lg active:scale-[0.98] transition-all text-left group select-none"
         >
-          <div className="w-11 h-11 rounded-full bg-[#EBF2EC] text-[#2A4436] flex items-center justify-center group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-full bg-[#EBF2EC] dark:bg-[#2A4436]/40 text-[#2A4436] dark:text-[#78A88E] flex items-center justify-center group-hover:scale-105 transition-transform">
             <Wifi className="w-5 h-5 stroke-[2.2]" />
           </div>
 
           <div className="mt-3">
-            <div className="flex items-center justify-between text-[#1C1B18]">
-              <h3 className="font-bold text-sm sm:text-base group-hover:text-[#2A4436] transition-colors">
+            <div className="flex items-center justify-between text-[#1C1B18] dark:text-white">
+              <h3 className="font-bold text-sm sm:text-base group-hover:text-[#2A4436] dark:group-hover:text-[#78A88E] transition-colors">
                 Wi-Fi
               </h3>
-              <ArrowRight className="w-4 h-4 text-[#78756E] group-hover:text-[#2A4436] group-hover:translate-x-0.5 transition-all" />
+              <ArrowRight className="w-4 h-4 text-[#78756E] dark:text-neutral-400 group-hover:text-[#2A4436] dark:group-hover:text-[#78A88E] group-hover:translate-x-0.5 transition-all" />
             </div>
-            <p className="text-xs text-[#78756E] font-medium mt-0.5 truncate">
+            <p className="text-xs text-[#78756E] dark:text-neutral-400 font-medium mt-0.5 truncate">
               {property.wifi.network}
             </p>
           </div>
@@ -228,20 +228,20 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
           role="button"
           tabIndex={0}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenQuickModal('play'); }}
-          className="bg-white rounded-[24px] p-4 shadow-soft-card border border-black/[0.03] flex flex-col justify-between min-h-[118px] cursor-pointer hover:shadow-soft-lg active:scale-[0.98] transition-all text-left group select-none"
+          className="bg-white dark:bg-[#1E1D1A] rounded-[24px] p-4 shadow-soft-card border border-black/[0.04] dark:border-white/[0.08] flex flex-col justify-between min-h-[118px] cursor-pointer hover:shadow-soft-lg active:scale-[0.98] transition-all text-left group select-none"
         >
-          <div className="w-11 h-11 rounded-full bg-[#F7EBE4] text-[#9E5A3F] flex items-center justify-center group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-full bg-[#F7EBE4] dark:bg-[#9E5A3F]/30 text-[#9E5A3F] dark:text-[#E8997A] flex items-center justify-center group-hover:scale-105 transition-transform">
             <Gamepad2 className="w-5 h-5 stroke-[2.2]" />
           </div>
 
           <div className="mt-3">
-            <div className="flex items-center justify-between text-[#1C1B18]">
-              <h3 className="font-bold text-sm sm:text-base group-hover:text-[#9E5A3F] transition-colors">
+            <div className="flex items-center justify-between text-[#1C1B18] dark:text-white">
+              <h3 className="font-bold text-sm sm:text-base group-hover:text-[#9E5A3F] dark:group-hover:text-[#E8997A] transition-colors">
                 Play
               </h3>
-              <ArrowRight className="w-4 h-4 text-[#78756E] group-hover:text-[#9E5A3F] group-hover:translate-x-0.5 transition-all" />
+              <ArrowRight className="w-4 h-4 text-[#78756E] dark:text-neutral-400 group-hover:text-[#9E5A3F] dark:group-hover:text-[#E8997A] group-hover:translate-x-0.5 transition-all" />
             </div>
-            <p className="text-xs text-[#78756E] font-medium mt-0.5">
+            <p className="text-xs text-[#78756E] dark:text-neutral-400 font-medium mt-0.5">
               4 Intensities
             </p>
           </div>
@@ -256,20 +256,20 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
           role="button"
           tabIndex={0}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenQuickModal('recommendations'); }}
-          className="bg-white rounded-[24px] p-4 shadow-soft-card border border-black/[0.03] flex flex-col justify-between min-h-[118px] cursor-pointer hover:shadow-soft-lg active:scale-[0.98] transition-all text-left group select-none"
+          className="bg-white dark:bg-[#1E1D1A] rounded-[24px] p-4 shadow-soft-card border border-black/[0.04] dark:border-white/[0.08] flex flex-col justify-between min-h-[118px] cursor-pointer hover:shadow-soft-lg active:scale-[0.98] transition-all text-left group select-none"
         >
-          <div className="w-11 h-11 rounded-full bg-[#EBF2EC] text-[#2A4436] flex items-center justify-center group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-full bg-[#EBF2EC] dark:bg-[#2A4436]/40 text-[#2A4436] dark:text-[#78A88E] flex items-center justify-center group-hover:scale-105 transition-transform">
             <MapPin className="w-5 h-5 stroke-[2.2]" />
           </div>
 
           <div className="mt-3">
-            <div className="flex items-center justify-between text-[#1C1B18]">
-              <h3 className="font-bold text-sm sm:text-base group-hover:text-[#2A4436] transition-colors leading-tight">
+            <div className="flex items-center justify-between text-[#1C1B18] dark:text-white">
+              <h3 className="font-bold text-sm sm:text-base group-hover:text-[#2A4436] dark:group-hover:text-[#78A88E] transition-colors leading-tight">
                 Recommendations
               </h3>
-              <ArrowRight className="w-4 h-4 text-[#78756E] group-hover:text-[#2A4436] group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+              <ArrowRight className="w-4 h-4 text-[#78756E] dark:text-neutral-400 group-hover:text-[#2A4436] dark:group-hover:text-[#78A88E] group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
             </div>
-            <p className="text-xs text-[#78756E] font-medium mt-0.5 truncate">
+            <p className="text-xs text-[#78756E] dark:text-neutral-400 font-medium mt-0.5 truncate">
               {property.recommendations.length} curated spots
             </p>
           </div>
@@ -280,52 +280,58 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
           href={`https://www.google.com/maps/dir/?api=1&destination=${property.coordinates?.lat || 39.1677},${property.coordinates?.lng || -120.1452}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-white rounded-[24px] p-4 shadow-soft-card border border-black/[0.03] flex flex-col justify-between min-h-[118px] cursor-pointer hover:shadow-soft-lg active:scale-[0.98] transition-all text-left group select-none relative"
+          className="bg-white dark:bg-[#1E1D1A] rounded-[24px] p-4 shadow-soft-card border border-black/[0.04] dark:border-white/[0.08] flex flex-col justify-between min-h-[118px] cursor-pointer hover:shadow-soft-lg active:scale-[0.98] transition-all text-left group select-none relative"
           title={`Get directions back to ${property.name}`}
         >
           <div className="flex items-center justify-between">
-            <div className="w-11 h-11 rounded-full bg-[#EBF2EC] text-[#2A4436] flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-11 h-11 rounded-full bg-[#EBF2EC] dark:bg-[#2A4436]/40 text-[#2A4436] dark:text-[#78A88E] flex items-center justify-center group-hover:scale-105 transition-transform">
               <Navigation className="w-5 h-5 stroke-[2.2]" />
             </div>
-            <span className="w-2 h-2 rounded-full bg-[#2A4436] animate-pulse mr-1" />
           </div>
 
           <div className="mt-3">
-            <div className="flex items-center justify-between text-[#1C1B18]">
-              <h3 className="font-bold text-sm sm:text-base group-hover:text-[#2A4436] transition-colors leading-tight">
+            <div className="flex items-center justify-between text-[#1C1B18] dark:text-white">
+              <h3 className="font-bold text-sm sm:text-base group-hover:text-[#2A4436] dark:group-hover:text-[#78A88E] transition-colors leading-tight">
                 Return Home
               </h3>
-              <ExternalLink className="w-3.5 h-3.5 text-[#78756E] group-hover:text-[#2A4436] transition-all shrink-0 ml-1" />
+              <ArrowRight className="w-4 h-4 text-[#78756E] dark:text-neutral-400 group-hover:text-[#2A4436] dark:group-hover:text-[#78A88E] group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
             </div>
-            <p className="text-xs text-[#78756E] font-medium mt-0.5 truncate">
+            <p className="text-xs text-[#78756E] dark:text-neutral-400 font-medium mt-0.5 truncate">
               Way to Home · Maps
             </p>
           </div>
         </a>
       </div>
 
+      {/* Powered by dwellio branding footer */}
+      <div className="pt-4 pb-2 text-center select-none">
+        <p className="text-[12px] font-medium text-[#78756E]/90 dark:text-neutral-400/90 tracking-wide">
+          Powered by <span className="font-serif font-bold text-[#1C1B18] dark:text-white">dwellio</span>
+        </p>
+      </div>
+
       {/* Confirmation Dialog Modal */}
       {confirmDialog.isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-black/10 space-y-4 text-left safe-bottom">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+          <div className="bg-white dark:bg-[#1E1D1A] w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-black/10 dark:border-white/10 space-y-4 text-left safe-bottom transition-colors">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#EBF2EC] text-[#2A4436] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-[#EBF2EC] dark:bg-[#2A4436]/40 text-[#2A4436] dark:text-[#78A88E] flex items-center justify-center shrink-0">
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-serif text-lg font-bold text-[#1C1B18]">{confirmDialog.title}</h3>
-                <span className="text-[11px] text-[#78756E] font-medium">Host notification confirmation</span>
+                <h3 className="font-serif text-lg font-bold text-[#1C1B18] dark:text-white">{confirmDialog.title}</h3>
+                <span className="text-[11px] text-[#78756E] dark:text-neutral-400 font-medium">Host notification confirmation</span>
               </div>
             </div>
 
-            <p className="text-xs text-[#5C5A55] leading-relaxed">
+            <p className="text-xs text-[#5C5A55] dark:text-neutral-300 leading-relaxed">
               {confirmDialog.message}
             </p>
 
             <div className="grid grid-cols-2 gap-2 pt-2">
               <button
                 onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
-                className="py-2.5 px-4 rounded-xl bg-[#F6F4F0] hover:bg-[#ECE8E1] text-xs font-semibold text-[#5C5A55] transition-colors"
+                className="py-2.5 px-4 rounded-xl bg-[#F6F4F0] dark:bg-white/10 hover:bg-[#ECE8E1] dark:hover:bg-white/15 text-xs font-semibold text-[#5C5A55] dark:text-neutral-200 transition-colors"
               >
                 Cancel
               </button>

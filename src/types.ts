@@ -51,6 +51,7 @@ export interface PropertyData {
   heroImage: string;
   doorImage?: string;
   assistantName: string;
+  customAiInstructions?: string;
   host: {
     name: string;
     avatar: string;

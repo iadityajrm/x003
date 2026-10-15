@@ -30,15 +30,6 @@ interface OsmLocationPickerProps {
   onSave?: (coords: PropertyCoordinates) => void;
 }
 
-const PROPERTY_TAGS = [
-  { id: 'Vacation Home', label: '🏡 Vacation Home' },
-  { id: 'Cabin / Chalet', label: '🌲 Cabin / Chalet' },
-  { id: 'Villa / Estate', label: '🏰 Villa / Estate' },
-  { id: 'Beach House', label: '🏖️ Beach House' },
-  { id: 'Condo / Apartment', label: '🏢 Condo / Flat' },
-  { id: 'Cottage', label: '🪵 Cottage' },
-];
-
 export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
   coordinates = { lat: 39.1677, lng: -120.1452, address: 'Lake Tahoe, CA' },
   propertyName = 'Property',
@@ -55,18 +46,21 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
 
-  // Structured address fields (Swiggy / Zomato style)
+  // Structured address fields
   const [houseNumber, setHouseNumber] = useState(coordinates.houseNumber || '');
   const [road, setRoad] = useState(coordinates.road || '');
   const [landmark, setLandmark] = useState(coordinates.landmark || '');
   const [city, setCity] = useState(coordinates.city || '');
-  const [selectedTag, setSelectedTag] = useState(coordinates.tag || 'Vacation Home');
   const [fullAddress, setFullAddress] = useState(coordinates.address || 'Lake Tahoe, CA');
   const [currentCoords, setCurrentCoords] = useState<{ lat: number; lng: number }>({
     lat: coordinates.lat || 39.1677,
     lng: coordinates.lng || -120.1452,
   });
 
+  // Modification tracking for visual hierarchy & grayed out state
+  const [hasChanges, setHasChanges] = useState(false);
+  const [hasSearchHit, setHasSearchHit] = useState(false);
+  const [showSaveLocationPrompt, setShowSaveLocationPrompt] = useState(false);
   const [confirmedNotice, setConfirmedNotice] = useState(false);
 
   // Custom refined pin icon matching Guest Assistant sage theme
@@ -90,6 +84,8 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
   // Helper to reverse geocode and populate fields
   const updateAddressFromCoords = async (lat: number, lng: number) => {
     setIsReverseGeocoding(true);
+    setHasChanges(true);
+    setShowSaveLocationPrompt(true);
     try {
       const details: OsmAddressDetails = await reverseGeocodeOSMDetails(lat, lng);
       setCurrentCoords({ lat, lng });
@@ -114,7 +110,6 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
         road: details.road || road,
         landmark,
         city: details.city || city,
-        tag: selectedTag,
       };
       onChange(newCoords);
     } catch (err) {
@@ -201,7 +196,6 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
       if (coordinates.road) setRoad(coordinates.road);
       if (coordinates.landmark) setLandmark(coordinates.landmark);
       if (coordinates.city) setCity(coordinates.city);
-      if (coordinates.tag) setSelectedTag(coordinates.tag);
     }
   }, [coordinates.lat, coordinates.lng, coordinates.address]);
 
@@ -211,6 +205,7 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
+    setHasSearchHit(true);
     const results = await searchLocationOSM(searchQuery);
     setSearchResults(results);
     setIsSearching(false);
@@ -224,6 +219,9 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
     markerRef.current.setLatLng([result.lat, result.lng]);
     setCurrentCoords({ lat: result.lat, lng: result.lng });
     setFullAddress(result.display_name);
+    setHasChanges(true);
+    setHasSearchHit(true);
+    setShowSaveLocationPrompt(true);
 
     if (result.addressDetails) {
       if (result.addressDetails.houseNumber) setHouseNumber(result.addressDetails.houseNumber);
@@ -244,7 +242,6 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
       road: result.addressDetails?.road || road,
       landmark,
       city: result.addressDetails?.city || city,
-      tag: selectedTag,
     };
     onChange(newCoords);
   };
@@ -276,7 +273,6 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
       road: road.trim(),
       landmark: landmark.trim(),
       city: city.trim(),
-      tag: selectedTag,
     };
 
     onChange(confirmed);
@@ -284,6 +280,9 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
       onSave(confirmed);
     }
 
+    setHasChanges(false);
+    setShowSaveLocationPrompt(false);
+    setHasSearchHit(false);
     setConfirmedNotice(true);
     setTimeout(() => setConfirmedNotice(false), 3500);
   };
@@ -397,6 +396,20 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
             <span className="hidden sm:inline">Google Maps ↗</span>
           </a>
         </div>
+
+        {/* Floating Save Location Pin Button on Map */}
+        {showSaveLocationPrompt && (
+          <div className="absolute bottom-3 right-3 z-20 animate-fade-in shadow-xl">
+            <button
+              type="button"
+              onClick={handleConfirmLocation}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-md active:scale-95 transition-all cursor-pointer whitespace-nowrap border border-white/20"
+            >
+              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>Save Pin</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 3. Doorstep Pin Summary Header */}
@@ -427,8 +440,8 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
         </div>
       </div>
 
-      {/* 4. Structured Address Details */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-white border border-black/5 shadow-soft-card space-y-4">
+      {/* 4. Structured Address Details (Styled to match pinned doorstep element) */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF8F5] border border-black/5 space-y-4">
         <div className="border-b border-black/5 pb-2.5">
           <h3 className="font-serif text-sm sm:text-base font-bold text-[#1C1B18]">
             Address & Entry Notes
@@ -436,29 +449,6 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
           <p className="text-[11px] text-[#78756E] mt-0.5">
             Simple details to help your guests reach your door smoothly.
           </p>
-        </div>
-
-        {/* Property Type Pills */}
-        <div>
-          <label className="block text-[11px] font-bold text-[#78756E] uppercase tracking-wider mb-2">
-            Property Tag
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {PROPERTY_TAGS.map((tag) => (
-              <button
-                key={tag.id}
-                type="button"
-                onClick={() => setSelectedTag(tag.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                  selectedTag === tag.id
-                    ? 'bg-[#2A4436] text-white shadow-soft-sm'
-                    : 'bg-[#F6F4F0] text-[#5C5A55] hover:text-[#1C1B18] border border-black/5'
-                }`}
-              >
-                {tag.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Input Grid: House No, Street, Landmark */}
@@ -470,9 +460,12 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
             <input
               type="text"
               value={houseNumber}
-              onChange={(e) => setHouseNumber(e.target.value)}
+              onChange={(e) => {
+                setHouseNumber(e.target.value);
+                setHasChanges(true);
+              }}
               placeholder="e.g. Chalet 4, Unit 12B, or Main Gate"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] font-medium focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-black/10 text-xs text-[#1C1B18] font-medium focus:outline-none focus:border-[#2A4436] transition-all"
             />
             <span className="text-[10px] text-[#78756E] mt-1 block">
               Helps guests identify the right door or cottage
@@ -486,9 +479,12 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
             <input
               type="text"
               value={road}
-              onChange={(e) => setRoad(e.target.value)}
+              onChange={(e) => {
+                setRoad(e.target.value);
+                setHasChanges(true);
+              }}
               placeholder="e.g. 745 West Lake Boulevard"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] transition-all"
             />
             <span className="text-[10px] text-[#78756E] mt-1 block">
               Auto-filled from map pin, edit if needed
@@ -502,34 +498,42 @@ export const OsmLocationPicker: React.FC<OsmLocationPickerProps> = ({
             <input
               type="text"
               value={landmark}
-              onChange={(e) => setLandmark(e.target.value)}
+              onChange={(e) => {
+                setLandmark(e.target.value);
+                setHasChanges(true);
+              }}
               placeholder="e.g. Opposite West Shore Marina, take gravel driveway behind the cedar tree"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] transition-all"
             />
             <span className="text-[10px] text-[#78756E] mt-1 block">
               Helps guests locate the driveway and front door easily
             </span>
           </div>
         </div>
+      </div>
 
-        {/* Confirmation CTA Button */}
-        <div className="pt-2">
-          <button
-            type="button"
-            onClick={handleConfirmLocation}
-            className="w-full py-3 px-4 rounded-2xl bg-[#2A4436] hover:bg-[#20362B] active:scale-[0.99] text-white font-semibold text-xs sm:text-sm shadow-soft-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Check className="w-4 h-4 stroke-[2.5]" />
-            <span>Save Address & Doorstep Pin</span>
-          </button>
+      {/* Separate Action Button Block for Clear Visual Hierarchy */}
+      <div className="pt-1">
+        <button
+          type="button"
+          disabled={!hasChanges}
+          onClick={handleConfirmLocation}
+          className={`w-full py-3.5 px-4 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 ${
+            hasChanges
+              ? 'bg-[#2A4436] hover:bg-[#20362B] active:scale-[0.99] text-white shadow-soft-sm cursor-pointer'
+              : 'bg-[#E5E2DC] text-[#8C8880] cursor-not-allowed border border-black/5'
+          }`}
+        >
+          <Check className={`w-4 h-4 ${hasChanges ? 'stroke-[2.5]' : 'opacity-40'}`} />
+          <span>{hasChanges ? 'Save Address & Doorstep Pin' : 'Address & Doorstep Pin Saved'}</span>
+        </button>
 
-          {confirmedNotice && (
-            <div className="mt-2 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-center gap-2 animate-fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Doorstep pin & address saved!</span>
-            </div>
-          )}
-        </div>
+        {confirmedNotice && (
+          <div className="mt-2.5 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-center gap-2 animate-fade-in shadow-sm">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Doorstep pin & address saved to backend!</span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -55,6 +55,24 @@ function getOfflineFallbackResponse(
     query.includes('check-in') ||
     query.includes('key')
   ) {
+    const isUnlocked = typeof window !== 'undefined' ? 
+      (sessionStorage.getItem(`dwellio_unlocked_guest_${property.slug}`) === 'true' || 
+       localStorage.getItem(`dwellio_unlocked_guest_${property.slug}`) === 'true') : false;
+
+    if (!isUnlocked) {
+      return {
+        id,
+        sender: 'assistant',
+        timestamp,
+        content: `To protect your security, door keypad codes and physical lockbox codes are protected.\n\nPlease open the **Getting Inside** guide and verify your booking phone number to reveal the code!`,
+        hasAudioResponse: true,
+        actionChips: [
+          { label: '🔑 Verify & Reveal Code', prompt: 'Open check-in guide', action: 'open_checkin' },
+          { label: `📞 Call Host (${property.host.name})`, prompt: `Call ${property.host.name}`, action: 'open_call' },
+        ],
+      };
+    }
+
     return {
       id,
       sender: 'assistant',

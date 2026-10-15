@@ -35,19 +35,19 @@ export const EmergencyCallScreen: React.FC<EmergencyCallScreenProps> = ({
           return (
             <div
               key={idx}
-              className="p-4 rounded-2xl bg-white border border-black/5 shadow-soft-sm space-y-2.5"
+              className="p-4 rounded-2xl bg-white dark:bg-[#1E1D1A] border border-black/5 dark:border-white/10 shadow-soft-sm space-y-2.5 transition-colors"
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#78756E]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#78756E] dark:text-neutral-400">
                     {contact.label}
                   </span>
-                  <h3 className="font-bold text-sm text-[#1C1B18]">{contact.name}</h3>
+                  <h3 className="font-bold text-sm text-[#1C1B18] dark:text-white">{contact.name}</h3>
                 </div>
-                <span className="font-mono text-sm font-bold text-[#2A4436]">{contact.number}</span>
+                <span className="font-mono text-sm font-bold text-[#2A4436] dark:text-[#78A88E]">{contact.number}</span>
               </div>
 
-              <p className="text-xs text-[#5C5A55]">{contact.description}</p>
+              <p className="text-xs text-[#5C5A55] dark:text-neutral-300">{contact.description}</p>
 
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <a
@@ -64,16 +64,16 @@ export const EmergencyCallScreen: React.FC<EmergencyCallScreenProps> = ({
 
                 <button
                   onClick={() => handleCopy(contact.number, idx)}
-                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#F6F4F0] hover:bg-[#ECE8E1] text-xs font-semibold text-[#1C1B18] border border-black/5 transition-all active:scale-95"
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#F6F4F0] dark:bg-white/10 hover:bg-[#ECE8E1] dark:hover:bg-white/15 text-xs font-semibold text-[#1C1B18] dark:text-white border border-black/5 dark:border-white/10 transition-all active:scale-95 cursor-pointer"
                 >
                   {copiedIndex === idx ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-[#2A4436]" />
-                      <span className="text-[#2A4436]">Copied</span>
+                      <Check className="w-3.5 h-3.5 text-[#2A4436] dark:text-[#78A88E]" />
+                      <span className="text-[#2A4436] dark:text-[#78A88E]">Copied</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5 text-[#78756E]" />
+                      <Copy className="w-3.5 h-3.5 text-[#78756E] dark:text-neutral-400" />
                       <span>Copy Number</span>
                     </>
                   )}

@@ -121,54 +121,54 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
               {/* Game 1: Truth or Dare */}
               <button
                 onClick={() => setSelectedGame('truthOrDare')}
-                className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between min-h-[135px] ${
+                className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between min-h-[135px] cursor-pointer ${
                   selectedGame === 'truthOrDare'
-                    ? 'bg-white border-[#2A4436] shadow-soft-card ring-2 ring-[#2A4436]/10'
-                    : 'bg-white/80 hover:bg-white border-black/5 opacity-80'
+                    ? 'bg-white dark:bg-[#1E1D1A] border-[#2A4436] dark:border-[#78A88E] shadow-soft-card ring-2 ring-[#2A4436]/10 dark:ring-[#78A88E]/20'
+                    : 'bg-white/80 dark:bg-[#1E1D1A]/80 hover:bg-white dark:hover:bg-[#1E1D1A] border-black/5 dark:border-white/10 opacity-80'
                 }`}
               >
-                <div className="w-10 h-10 rounded-xl bg-[#EBF2EC] text-[#2A4436] flex items-center justify-center mb-2">
+                <div className="w-10 h-10 rounded-xl bg-[#EBF2EC] dark:bg-[#2A4436]/40 text-[#2A4436] dark:text-[#78A88E] flex items-center justify-center mb-2">
                   <Flame className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-[#1C1B18]">Truth or Dare</h3>
-                  <p className="text-[11px] text-[#78756E] mt-0.5 leading-snug">
+                  <h3 className="font-bold text-sm sm:text-base text-[#1C1B18] dark:text-white">Truth or Dare</h3>
+                  <p className="text-[11px] text-[#78756E] dark:text-neutral-400 mt-0.5 leading-snug">
                     Rotating turn. Glowing animated cards.
                   </p>
                 </div>
                 {selectedGame === 'truthOrDare' && (
-                  <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-[#2A4436]" />
+                  <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-[#2A4436] dark:bg-[#78A88E]" />
                 )}
               </button>
 
               {/* Game 2: Never Have I Ever */}
               <button
                 onClick={() => setSelectedGame('neverHaveIEver')}
-                className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between min-h-[135px] ${
+                className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between min-h-[135px] cursor-pointer ${
                   selectedGame === 'neverHaveIEver'
-                    ? 'bg-white border-[#7A684D] shadow-soft-card ring-2 ring-[#7A684D]/10'
-                    : 'bg-white/80 hover:bg-white border-black/5 opacity-80'
+                    ? 'bg-white dark:bg-[#1E1D1A] border-[#7A684D] dark:border-[#D4C3A3] shadow-soft-card ring-2 ring-[#7A684D]/10 dark:ring-[#D4C3A3]/20'
+                    : 'bg-white/80 dark:bg-[#1E1D1A]/80 hover:bg-white dark:hover:bg-[#1E1D1A] border-black/5 dark:border-white/10 opacity-80'
                 }`}
               >
-                <div className="w-10 h-10 rounded-xl bg-[#F4EFE6] text-[#7A684D] flex items-center justify-center mb-2">
+                <div className="w-10 h-10 rounded-xl bg-[#F4EFE6] dark:bg-[#7A684D]/30 text-[#7A684D] dark:text-[#D4C3A3] flex items-center justify-center mb-2">
                   <Hand className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-[#1C1B18]">Never Have I Ever</h3>
-                  <p className="text-[11px] text-[#78756E] mt-0.5 leading-snug">
+                  <h3 className="font-bold text-sm sm:text-base text-[#1C1B18] dark:text-white">Never Have I Ever</h3>
+                  <p className="text-[11px] text-[#78756E] dark:text-neutral-400 mt-0.5 leading-snug">
                     Secret voting & group reveal with 5 tokens.
                   </p>
                 </div>
                 {selectedGame === 'neverHaveIEver' && (
-                  <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-[#7A684D]" />
+                  <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-[#7A684D] dark:bg-[#D4C3A3]" />
                 )}
               </button>
             </div>
           </div>
 
           {/* 2. Choose Intensity Level */}
-          <div className="p-4 rounded-2xl bg-white border border-black/5 shadow-soft-card space-y-2.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#78756E] block">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#1E1D1A] border border-black/5 dark:border-white/10 shadow-soft-card space-y-2.5 transition-colors">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#78756E] dark:text-neutral-400 block">
               2. Select Intensity Level
             </span>
             <div className="grid grid-cols-2 gap-2">
@@ -179,10 +179,10 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
                   <button
                     key={lvl}
                     onClick={() => setSelectedIntensity(lvl)}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                       isSelected
                         ? `${info.bg} ${info.color} border-current shadow-sm font-bold scale-[1.02]`
-                        : 'bg-[#F6F4F0] text-[#5C5A55] border-black/5 hover:bg-[#ECE8E1]'
+                        : 'bg-[#F6F4F0] dark:bg-white/10 text-[#5C5A55] dark:text-neutral-300 border-black/5 dark:border-white/10 hover:bg-[#ECE8E1] dark:hover:bg-white/15'
                     }`}
                   >
                     <span className="text-base">{info.emoji}</span>
@@ -194,18 +194,18 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
           </div>
 
           {/* 3. Players Setup Section */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white border border-black/5 shadow-soft-card space-y-3">
+          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#1E1D1A] border border-black/5 dark:border-white/10 shadow-soft-card space-y-3 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-sm text-[#1C1B18]">3. Players Roster</h3>
-                <p className="text-xs text-[#78756E]">
+                <h3 className="font-bold text-sm text-[#1C1B18] dark:text-white">3. Players Roster</h3>
+                <p className="text-xs text-[#78756E] dark:text-neutral-400">
                   {players.length} players · Turn rotates in order
                 </p>
               </div>
 
               <button
                 onClick={handleShufflePlayers}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#F6F4F0] hover:bg-[#ECE8E1] text-xs font-semibold text-[#5C5A55] transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#F6F4F0] dark:bg-white/10 hover:bg-[#ECE8E1] dark:hover:bg-white/15 text-xs font-semibold text-[#5C5A55] dark:text-neutral-300 transition-colors cursor-pointer"
                 title="Randomize turn order"
               >
                 <Shuffle className="w-3.5 h-3.5" />
@@ -218,21 +218,21 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
               {players.map((p, idx) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#F6F4F0] border border-black/5 text-xs"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#F6F4F0] dark:bg-white/5 border border-black/5 dark:border-white/10 text-xs"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-[10px] font-mono text-[#78756E] w-4">{idx + 1}.</span>
-                    <div className="w-6 h-6 rounded-full bg-[#2A4436] text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+                    <span className="text-[10px] font-mono text-[#78756E] dark:text-neutral-400 w-4">{idx + 1}.</span>
+                    <div className="w-6 h-6 rounded-full bg-[#2A4436] dark:bg-[#78A88E] text-white dark:text-[#17271E] flex items-center justify-center font-bold text-[10px] shrink-0">
                       {p.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="font-bold text-[#1C1B18] truncate">{p.name}</span>
+                    <span className="font-bold text-[#1C1B18] dark:text-white truncate">{p.name}</span>
                   </div>
 
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleMovePlayer(idx, 'up')}
                       disabled={idx === 0}
-                      className="p-1.5 text-[#78756E] hover:text-[#1C1B18] disabled:opacity-30"
+                      className="p-1.5 text-[#78756E] dark:text-neutral-400 hover:text-[#1C1B18] dark:hover:text-white disabled:opacity-30 cursor-pointer"
                       title="Move turn earlier"
                     >
                       <ArrowUp className="w-3.5 h-3.5" />
@@ -240,7 +240,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
                     <button
                       onClick={() => handleMovePlayer(idx, 'down')}
                       disabled={idx === players.length - 1}
-                      className="p-1.5 text-[#78756E] hover:text-[#1C1B18] disabled:opacity-30"
+                      className="p-1.5 text-[#78756E] dark:text-neutral-400 hover:text-[#1C1B18] dark:hover:text-white disabled:opacity-30 cursor-pointer"
                       title="Move turn later"
                     >
                       <ArrowDown className="w-3.5 h-3.5" />
@@ -248,7 +248,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
                     <button
                       onClick={() => handleRemovePlayer(p.id)}
                       disabled={players.length <= 2}
-                      className="p-1.5 text-[#78756E] hover:text-red-600 disabled:opacity-30 ml-1"
+                      className="p-1.5 text-[#78756E] dark:text-neutral-400 hover:text-red-600 disabled:opacity-30 ml-1 cursor-pointer"
                       title="Remove player"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -265,13 +265,13 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
                 value={newPlayerName}
                 onChange={(e) => setNewPlayerName(e.target.value)}
                 placeholder="Enter player name..."
-                className="flex-1 bg-[#F6F4F0] border border-black/10 rounded-xl px-3.5 py-2.5 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436]"
+                className="flex-1 bg-[#F6F4F0] dark:bg-white/10 border border-black/10 dark:border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-[#1C1B18] dark:text-white focus:outline-none focus:border-[#2A4436]"
                 maxLength={18}
               />
               <button
                 type="submit"
                 disabled={!newPlayerName.trim()}
-                className="flex items-center gap-1 px-4 py-2.5 rounded-xl bg-[#2A4436] hover:bg-[#20362B] disabled:opacity-40 text-white font-semibold text-xs transition-all active:scale-95 shrink-0"
+                className="flex items-center gap-1 px-4 py-2.5 rounded-xl bg-[#2A4436] hover:bg-[#20362B] disabled:opacity-40 text-white font-semibold text-xs transition-all active:scale-95 shrink-0 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add</span>
