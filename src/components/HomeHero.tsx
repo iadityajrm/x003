@@ -306,7 +306,16 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
       {/* Powered by dwellio branding footer */}
       <div className="pt-4 pb-2 text-center select-none">
         <p className="text-[12px] font-medium text-[#78756E]/90 dark:text-neutral-400/90 tracking-wide">
-          Powered by <span className="font-serif font-bold text-[#1C1B18] dark:text-white">dwellio</span>
+          Powered by{' '}
+          <button
+            onClick={() => {
+              window.history.pushState({}, '', '/');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
+            className="font-serif font-bold text-[#1C1B18] dark:text-white hover:text-[#2A4436] dark:hover:text-[#78A88E] transition-colors cursor-pointer hover:underline"
+          >
+            dwellio
+          </button>
         </p>
       </div>
 

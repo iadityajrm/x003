@@ -1,0 +1,16 @@
+# Robots.txt for Dwellio AI Guest Assistant & Chat
+# https://dwellio.app
+
+User-agent: *
+Allow: /
+Allow: /stay/
+Allow: /demo
+Allow: /client/
+Disallow: /api/
+Disallow: /.netlify/
+
+# Crawl delay
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://dwellio.app/sitemap.xml

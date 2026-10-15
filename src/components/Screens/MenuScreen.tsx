@@ -18,12 +18,14 @@ interface MenuScreenProps {
   property: PropertyData;
   onSelectOption: (option: 'guide' | 'wifi' | 'checkin' | 'host' | 'recommendations' | 'play' | 'call') => void;
   onBack: () => void;
+  onOpenWebsite?: () => void;
 }
 
 export const MenuScreen: React.FC<MenuScreenProps> = ({
   property,
   onSelectOption,
   onBack,
+  onOpenWebsite,
 }) => {
   const menuItems = [
     {
@@ -130,7 +132,20 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           </a>
 
           <div className="text-[11px] text-[#78756E]/80 dark:text-neutral-400/80 font-medium">
-            Powered by <span className="font-serif font-bold text-[#1C1B18] dark:text-white">dwellio</span>
+            Powered by{' '}
+            <button
+              onClick={() => {
+                if (onOpenWebsite) {
+                  onOpenWebsite();
+                } else {
+                  window.history.pushState({}, '', '/');
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                }
+              }}
+              className="font-serif font-bold text-[#1C1B18] dark:text-white hover:text-[#2A4436] dark:hover:text-[#78A88E] transition-colors cursor-pointer hover:underline"
+            >
+              dwellio
+            </button>
           </div>
         </div>
       </div>

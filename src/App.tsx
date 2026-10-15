@@ -20,6 +20,8 @@ import { ImagePreviewModal } from './components/Modals/ImagePreviewModal';
 import { ClientDashboard } from './components/Client/ClientDashboard';
 import { AdminDashboard } from './components/Admin/AdminDashboard';
 
+import { DwellioWebsite } from './components/Website/DwellioWebsite';
+
 import { DEFAULT_SLUG, getPropertyBySlug } from './data/properties';
 import { PropertyData, ChatMessage } from './types';
 import { generateAssistantResponse } from './utils/aiResponse';
@@ -37,17 +39,21 @@ export type AppScreen =
   | 'play' 
   | 'menu';
 
-type ViewMode = 'guest' | 'client' | 'admin';
+type ViewMode = 'website' | 'guest' | 'client' | 'admin';
 
 export function App() {
   // 1. URL Path & Routing Parsing
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
+      const params = new URLSearchParams(window.location.search);
       if (path.startsWith('/admin')) return 'admin';
       if (path === '/client' || path === '/client/' || path.startsWith('/host')) return 'client';
+      if (path.startsWith('/stay/') || path.startsWith('/client/')) return 'guest';
+      if (path === '/demo' || path === '/demo/' || path.startsWith('/guest') || params.get('demo') === 'true' || params.get('stay')) return 'guest';
+      if (path === '/' || path === '/about' || path === '/about/') return 'website';
     }
-    return 'guest';
+    return 'website';
   });
 
   const [currentSlug, setCurrentSlug] = useState<string>(() => {
@@ -197,10 +203,39 @@ export function App() {
     }
   };
 
+  const handleLaunchDemo = (slug?: string) => {
+    if (slug) {
+      setCurrentSlug(slug);
+      if (typeof window !== 'undefined' && window.history) {
+        window.history.pushState({}, '', `/stay/${slug}`);
+      }
+    } else {
+      if (typeof window !== 'undefined' && window.history) {
+        window.history.pushState({}, '', '/demo');
+      }
+    }
+    setCurrentScreen('home');
+    setViewMode('guest');
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  };
+
+  const handleBackToWebsite = () => {
+    setViewMode('website');
+    if (typeof window !== 'undefined' && window.history) {
+      window.history.pushState({}, '', '/');
+    }
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  };
+
   // Listen to browser popstate (back/forward button)
   useEffect(() => {
     const onPopState = () => {
       const path = window.location.pathname;
+      const params = new URLSearchParams(window.location.search);
       if (path.startsWith('/admin')) {
         setViewMode('admin');
       } else if (path === '/client' || path === '/client/' || path.startsWith('/host')) {
@@ -213,9 +248,11 @@ export function App() {
         setViewMode('guest');
         const slug = path.replace('/stay/', '').replace(/\/$/, '') || DEFAULT_SLUG;
         setCurrentSlug(slug);
-      } else {
+      } else if (path === '/demo' || path === '/demo/' || params.get('demo') === 'true' || params.get('stay')) {
         setViewMode('guest');
-        setCurrentSlug(DEFAULT_SLUG);
+        if (params.get('stay')) setCurrentSlug(params.get('stay')!);
+      } else {
+        setViewMode('website');
       }
     };
     window.addEventListener('popstate', onPopState);
@@ -297,7 +334,18 @@ export function App() {
     navigateTo('host');
   };
 
-  // 3. RENDER ADMIN DASHBOARD (Desktop View)
+  // 1. RENDER WEBSITE MARKETING & SHOWCASE (Desktop & Mobile SEO site)
+  if (viewMode === 'website') {
+    return (
+      <DwellioWebsite
+        onLaunchDemo={handleLaunchDemo}
+        onOpenClientPortal={handleNavigateToClientPortal}
+        onOpenAdmin={handleNavigateToAdmin}
+      />
+    );
+  }
+
+  // 2. RENDER ADMIN DASHBOARD (Desktop View)
   if (viewMode === 'admin') {
     return (
       <AdminDashboard
@@ -307,7 +355,7 @@ export function App() {
     );
   }
 
-  // 4. RENDER CLIENT DASHBOARD (Client Portal with Login)
+  // 3. RENDER CLIENT DASHBOARD (Client Portal with Login)
   if (viewMode === 'client') {
     return (
       <ClientDashboard
@@ -318,12 +366,25 @@ export function App() {
     );
   }
 
-  // 5. RENDER GUEST APP (Mobile-First Screen Router)
+  // 4. RENDER GUEST APP (Mobile-First Screen Router)
   const isHomeScreen = currentScreen === 'home';
   const showComposer = currentScreen !== 'play';
 
   return (
-    <div className="h-[100dvh] w-full bg-[#ECE8E1] dark:bg-[#0D0C0A] text-[#1C1B18] dark:text-[#EDEAE4] flex flex-col items-center justify-center overflow-hidden selection:bg-[#2A4436]/20 selection:text-[#1C1B18]">
+    <div className="h-[100dvh] w-full bg-[#ECE8E1] dark:bg-[#0D0C0A] text-[#1C1B18] dark:text-[#EDEAE4] flex flex-col items-center justify-center overflow-hidden selection:bg-[#2A4436]/20 selection:text-[#1C1B18] relative">
+      {/* Quick Website Switcher Pill for Desktop users previewing the live demo */}
+      <div className="hidden lg:flex items-center gap-3 absolute top-5 left-6 z-40">
+        <button
+          onClick={handleBackToWebsite}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/90 dark:bg-[#1E1D1A]/90 hover:bg-white dark:hover:bg-[#1E1D1A] text-xs font-semibold text-[#1C1B18] dark:text-white border border-black/10 dark:border-white/10 shadow-soft-sm backdrop-blur-md transition-all cursor-pointer"
+        >
+          <span>← Dwellio Website</span>
+        </button>
+        <span className="text-[11px] text-[#78756E] dark:text-neutral-400 bg-black/5 dark:bg-white/5 px-2.5 py-1 rounded-lg">
+          Live Guest Demo ({property.name})
+        </span>
+      </div>
+
       {/* Mobile App Screen Frame - fixed viewport height, never scrolls off screen */}
       <div className="w-full max-w-md h-[100dvh] flex flex-col bg-[#F6F4F0] dark:bg-[#151412] shadow-2xl relative border-x border-black/5 dark:border-white/10 overflow-hidden transition-colors">
         
@@ -437,6 +498,7 @@ export function App() {
               property={property}
               onSelectOption={(screen) => navigateTo(screen)}
               onBack={navigateBack}
+              onOpenWebsite={handleBackToWebsite}
             />
           )}
 
