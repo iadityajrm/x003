@@ -21,8 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('dwellio_theme') === 'dark' || 
-        document.documentElement.classList.contains('dark');
+      return localStorage.getItem('dwellio_guest_theme') === 'dark';
     }
     return false;
   });
@@ -30,10 +29,10 @@ export const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('dwellio_theme', 'dark');
+      localStorage.setItem('dwellio_guest_theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('dwellio_theme', 'light');
+      localStorage.setItem('dwellio_guest_theme', 'light');
     }
 
     const handleThemeChange = (e: Event) => {

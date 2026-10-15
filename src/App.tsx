@@ -203,32 +203,67 @@ export function App() {
     }
   };
 
-  const handleLaunchDemo = (slug?: string) => {
-    if (slug) {
-      setCurrentSlug(slug);
-      if (typeof window !== 'undefined' && window.history) {
-        window.history.pushState({}, '', `/stay/${slug}`);
-      }
+  const [isPageExiting, setIsPageExiting] = useState<boolean>(false);
+
+  // Sync theme between landing page (dark by default) and app (light by default)
+  useEffect(() => {
+    if (viewMode === 'website') {
+      document.documentElement.classList.add('dark');
     } else {
-      if (typeof window !== 'undefined' && window.history) {
-        window.history.pushState({}, '', '/demo');
+      const savedTheme = localStorage.getItem('dwellio_guest_theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
       }
     }
-    setCurrentScreen('home');
-    setViewMode('guest');
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
+  }, [viewMode]);
+
+  const handleLaunchDemo = (slug?: string) => {
+    setIsPageExiting(true);
+    setTimeout(() => {
+      if (slug) {
+        setCurrentSlug(slug);
+        if (typeof window !== 'undefined' && window.history) {
+          window.history.pushState({}, '', `/stay/${slug}`);
+        }
+      } else {
+        if (typeof window !== 'undefined' && window.history) {
+          window.history.pushState({}, '', '/demo');
+        }
+      }
+
+      // App defaults to light mode unless explicitly set to dark
+      const savedTheme = localStorage.getItem('dwellio_guest_theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+
+      setCurrentScreen('home');
+      setViewMode('guest');
+      setIsPageExiting(false);
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+    }, 280);
   };
 
   const handleBackToWebsite = () => {
-    setViewMode('website');
-    if (typeof window !== 'undefined' && window.history) {
-      window.history.pushState({}, '', '/');
-    }
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
+    setIsPageExiting(true);
+    setTimeout(() => {
+      // Landing page is dark mode by default
+      document.documentElement.classList.add('dark');
+      setViewMode('website');
+      if (typeof window !== 'undefined' && window.history) {
+        window.history.pushState({}, '', '/');
+      }
+      setIsPageExiting(false);
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+    }, 280);
   };
 
   // Listen to browser popstate (back/forward button)
@@ -341,6 +376,7 @@ export function App() {
         onLaunchDemo={handleLaunchDemo}
         onOpenClientPortal={handleNavigateToClientPortal}
         onOpenAdmin={handleNavigateToAdmin}
+        isExiting={isPageExiting}
       />
     );
   }
@@ -371,7 +407,9 @@ export function App() {
   const showComposer = currentScreen !== 'play';
 
   return (
-    <div className="h-[100dvh] w-full bg-[#ECE8E1] dark:bg-[#0D0C0A] text-[#1C1B18] dark:text-[#EDEAE4] flex flex-col items-center justify-center overflow-hidden selection:bg-[#2A4436]/20 selection:text-[#1C1B18] relative">
+    <div className={`h-[100dvh] w-full bg-[#ECE8E1] dark:bg-[#0D0C0A] text-[#1C1B18] dark:text-[#EDEAE4] flex flex-col items-center justify-center overflow-hidden selection:bg-[#2A4436]/20 selection:text-[#1C1B18] relative transition-all ${
+      isPageExiting ? 'animate-page-fade-out' : 'animate-page-fade-in'
+    }`}>
       {/* Quick Website Switcher Pill for Desktop users previewing the live demo */}
       <div className="hidden lg:flex items-center gap-3 absolute top-5 left-6 z-40">
         <button
