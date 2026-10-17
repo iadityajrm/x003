@@ -8,8 +8,10 @@ export interface CurrentGuestBooking {
   updatedAt: string;
 }
 
-const STORAGE_PREFIX = 'dwellio_current_guest_';
-const UNLOCKED_KEY_PREFIX = 'dwellio_unlocked_guest_';
+const STORAGE_PREFIX = 'relay_current_guest_';
+const LEGACY_STORAGE_PREFIX = 'dwellio_current_guest_';
+const UNLOCKED_KEY_PREFIX = 'relay_unlocked_guest_';
+const LEGACY_UNLOCKED_KEY_PREFIX = 'dwellio_unlocked_guest_';
 
 /**
  * Normalize phone numbers by removing all non-digit characters
@@ -50,7 +52,7 @@ export function getCurrentGuestBooking(slug: string): CurrentGuestBooking | null
     return DEFAULT_DEMO_BOOKINGS[slug] || null;
   }
   try {
-    const raw = localStorage.getItem(STORAGE_PREFIX + slug);
+    const raw = localStorage.getItem(STORAGE_PREFIX + slug) || localStorage.getItem(LEGACY_STORAGE_PREFIX + slug);
     if (raw) {
       return JSON.parse(raw);
     }
@@ -68,6 +70,7 @@ export function saveCurrentGuestBooking(slug: string, booking: CurrentGuestBooki
   try {
     if (!booking) {
       localStorage.removeItem(STORAGE_PREFIX + slug);
+      localStorage.removeItem(LEGACY_STORAGE_PREFIX + slug);
     } else {
       localStorage.setItem(STORAGE_PREFIX + slug, JSON.stringify(booking));
     }
@@ -83,7 +86,11 @@ export function saveCurrentGuestBooking(slug: string, booking: CurrentGuestBooki
 export function isCodesUnlockedForGuest(slug: string): boolean {
   if (typeof window === 'undefined') return false;
   try {
-    const unlocked = sessionStorage.getItem(UNLOCKED_KEY_PREFIX + slug) || localStorage.getItem(UNLOCKED_KEY_PREFIX + slug);
+    const unlocked =
+      sessionStorage.getItem(UNLOCKED_KEY_PREFIX + slug) ||
+      localStorage.getItem(UNLOCKED_KEY_PREFIX + slug) ||
+      sessionStorage.getItem(LEGACY_UNLOCKED_KEY_PREFIX + slug) ||
+      localStorage.getItem(LEGACY_UNLOCKED_KEY_PREFIX + slug);
     return unlocked === 'true';
   } catch {
     return false;

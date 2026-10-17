@@ -1,5 +1,5 @@
-# Robots.txt for Dwellio AI Guest Assistant & Chat
-# https://dwellio.app
+# Robots.txt for Relay Guest Assistant & Chat by FramewrkLabs
+# https://relay.framewrklabs.com
 
 User-agent: *
 Allow: /
@@ -13,4 +13,4 @@ Disallow: /.netlify/
 Crawl-delay: 1
 
 # Sitemap
-Sitemap: https://dwellio.app/sitemap.xml
+Sitemap: https://relay.framewrklabs.com/sitemap.xml

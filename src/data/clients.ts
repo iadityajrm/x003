@@ -1,12 +1,13 @@
 import { ClientAccount } from '../types';
 
-const CLIENTS_STORAGE_KEY = 'dwellio_client_accounts_v1';
+const CLIENTS_STORAGE_KEY = 'relay_client_accounts_v1';
+const LEGACY_STORAGE_KEY = 'dwellio_client_accounts_v1';
 
 const INITIAL_CLIENTS: ClientAccount[] = [
   {
     id: 'client-sarah',
     name: 'Sarah Jenkins',
-    email: 'sarah@dwellio.com',
+    email: 'sarah@relay.framewrklabs.com',
     passcode: 'host123',
     assignedPropertySlugs: ['cedar-house'],
     createdAt: '2026-10-01',
@@ -14,7 +15,7 @@ const INITIAL_CLIENTS: ClientAccount[] = [
   {
     id: 'client-david',
     name: 'David Miller',
-    email: 'david@dwellio.com',
+    email: 'david@relay.framewrklabs.com',
     passcode: 'host123',
     assignedPropertySlugs: ['pine-crest-villa'],
     createdAt: '2026-10-05',
@@ -26,7 +27,7 @@ let inMemoryClients: ClientAccount[] = [...INITIAL_CLIENTS];
 function loadClientsFromStorage(): ClientAccount[] {
   if (typeof window === 'undefined') return inMemoryClients;
   try {
-    const raw = localStorage.getItem(CLIENTS_STORAGE_KEY);
+    const raw = localStorage.getItem(CLIENTS_STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {

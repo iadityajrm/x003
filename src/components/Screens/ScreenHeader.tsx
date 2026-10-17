@@ -17,11 +17,11 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   rightAction,
 }) => {
   return (
-    <div className="sticky top-0 z-30 w-full bg-[#F6F4F0]/95 dark:bg-[#1A1916]/95 backdrop-blur-md px-4 py-3.5 border-b border-black/5 dark:border-white/10 flex items-center justify-between safe-top transition-colors">
+    <div className="sticky top-0 z-30 w-full bg-[#F5F5F7]/95 dark:bg-black/95 backdrop-blur-md px-4 py-3.5 border-b border-black/5 dark:border-white/10 flex items-center justify-between safe-top transition-colors">
       {/* Left: Native back button */}
       <button
         onClick={onBack}
-        className="flex items-center gap-1 text-[#2A4436] dark:text-[#78A88E] hover:text-[#20362B] dark:hover:text-emerald-300 active:scale-95 transition-all text-sm font-semibold group focus:outline-none -ml-1 py-1 px-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+        className="flex items-center gap-1 text-[#1D1D1F] dark:text-white hover:text-[#636366] dark:hover:text-[#A1A1A6] active:scale-95 transition-all text-sm font-semibold group focus:outline-none -ml-1 py-1 px-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
         aria-label="Go back"
       >
         <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform stroke-[2.5]" />

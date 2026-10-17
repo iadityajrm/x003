@@ -142,15 +142,15 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
     <div className="fixed bottom-0 left-0 right-0 z-40 w-full max-w-md mx-auto px-4 pb-4 safe-bottom pointer-events-none">
       {/* Quick Sample Prompts Popover (Triggered by '+') */}
       {showPromptsMenu && (
-        <div className="pointer-events-auto mb-2 p-3.5 rounded-2xl bg-white dark:bg-[#201F1C] border border-black/10 dark:border-white/10 shadow-2xl animate-slide-up">
+        <div className="pointer-events-auto mb-2 p-3.5 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/10 dark:border-white/10 shadow-2xl animate-slide-up">
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-black/5 dark:border-white/5">
             <div className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#2A4436] dark:text-[#78A88E]" />
-              <span className="text-xs font-bold text-[#1C1B18] dark:text-white">Quick Prompts for Assistant</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#1D1D1F] dark:text-white" />
+              <span className="text-xs font-bold text-[#1D1D1F] dark:text-white">Quick Prompts for Assistant</span>
             </div>
             <button
               onClick={() => setShowPromptsMenu(false)}
-              className="p-1 text-[#78756E] dark:text-neutral-400 hover:text-[#1C1B18] dark:hover:text-white rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+              className="p-1 text-[#86868B] dark:text-[#A1A1A6] hover:text-[#1D1D1F] dark:hover:text-white rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -164,9 +164,9 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
                   key={idx}
                   type="button"
                   onClick={() => handleSelectQuickPrompt(item.prompt, true)}
-                  className="flex items-center gap-2 p-2 rounded-xl bg-[#F6F4F0] dark:bg-white/5 hover:bg-[#EBF2EC] dark:hover:bg-white/10 text-xs font-semibold text-[#1C1B18] dark:text-white border border-black/5 dark:border-white/5 transition-all text-left cursor-pointer active:scale-95 group"
+                  className="flex items-center gap-2 p-2 rounded-xl bg-[#F5F5F7] dark:bg-white/5 hover:bg-[#E5E5EA] dark:hover:bg-white/10 text-xs font-semibold text-[#1D1D1F] dark:text-white border border-black/5 dark:border-white/5 transition-all text-left cursor-pointer active:scale-95 group"
                 >
-                  <div className="w-6 h-6 rounded-lg bg-white dark:bg-white/10 text-[#2A4436] dark:text-[#78A88E] flex items-center justify-center shrink-0 shadow-2xs group-hover:bg-[#2A4436] group-hover:text-white transition-colors">
+                  <div className="w-6 h-6 rounded-lg bg-white dark:bg-white/10 text-[#1D1D1F] dark:text-white flex items-center justify-center shrink-0 shadow-2xs group-hover:bg-[#1D1D1F] dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-black transition-colors">
                     <Icon className="w-3.5 h-3.5" />
                   </div>
                   <span className="truncate">{item.label}</span>
@@ -178,15 +178,15 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
       )}
 
       {/* The Main Rounded Pill Composer - Perfectly Centered Height & Children */}
-      <div className="pointer-events-auto relative flex items-center gap-2 px-2.5 py-1.5 rounded-[32px] bg-white/95 dark:bg-[#1E1D1A]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-composer transition-all">
-        {/* Attachment '+' Button in soft beige circular circle */}
+      <div className="pointer-events-auto relative flex items-center gap-2 px-2.5 py-1.5 rounded-[32px] bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-composer transition-all">
+        {/* Attachment '+' Button in soft grey circular circle */}
         {!isRecording && (
           <button
             onClick={() => setShowPromptsMenu(!showPromptsMenu)}
             className={`flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0 cursor-pointer ${
               showPromptsMenu
-                ? 'bg-[#2A4436] text-white rotate-45'
-                : 'bg-[#F4EFEA] dark:bg-white/10 hover:bg-[#EAE4DD] dark:hover:bg-white/15 text-[#3D3B36] dark:text-neutral-200'
+                ? 'bg-[#1D1D1F] dark:bg-white text-white dark:text-black rotate-45'
+                : 'bg-[#F5F5F7] dark:bg-white/10 hover:bg-[#E5E5EA] dark:hover:bg-white/15 text-[#1D1D1F] dark:text-white'
             }`}
             title="Quick sample prompts"
             aria-label="Quick Prompts"
@@ -220,14 +220,14 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
             <div className="flex items-center gap-1.5">
               <button
                 onClick={handleCancelRecording}
-                className="p-1.5 rounded-full text-[#78756E] dark:text-neutral-400 hover:text-red-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                className="p-1.5 rounded-full text-[#86868B] dark:text-neutral-400 hover:text-red-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
                 title="Cancel voice message"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
               <button
                 onClick={handleStopAndSendRecording}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-semibold shadow-sm active:scale-95 cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#1D1D1F] hover:bg-[#3A3A3C] dark:bg-white dark:hover:bg-[#E5E5EA] text-white dark:text-black text-xs font-semibold shadow-sm active:scale-95 cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Send</span>
@@ -245,7 +245,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
               onKeyDown={handleKeyDown}
               placeholder="Ask Anything..."
               disabled={disabled}
-              className="flex-1 bg-transparent px-2 py-1.5 text-sm text-[#1C1B18] dark:text-white placeholder-[#8E8B82] dark:placeholder-neutral-500 focus:outline-none focus:ring-0 min-w-0 resize-none max-h-[96px] overflow-y-auto leading-normal self-center"
+              className="flex-1 bg-transparent px-2 py-1.5 text-sm text-[#1D1D1F] dark:text-white placeholder-[#86868B] dark:placeholder-[#86868B] focus:outline-none focus:ring-0 min-w-0 resize-none max-h-[96px] overflow-y-auto leading-normal self-center"
             />
 
             {/* Right Action Controls Group */}
@@ -253,7 +253,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
               {/* Mic / Waveform Audio Button */}
               <button
                 onClick={handleStartRecording}
-                className="flex items-center justify-center w-8 h-8 rounded-full text-[#78756E] dark:text-neutral-400 hover:text-[#1C1B18] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
+                className="flex items-center justify-center w-8 h-8 rounded-full text-[#86868B] dark:text-neutral-400 hover:text-[#1D1D1F] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
                 title="Record audio message"
                 aria-label="Record audio message"
               >
@@ -271,8 +271,8 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
                 disabled={!draftText.trim() || disabled}
                 className={`flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0 ${
                   draftText.trim()
-                    ? 'bg-[#2A4436] hover:bg-[#20362B] text-white shadow-sm active:scale-95 cursor-pointer'
-                    : 'bg-[#2A4436]/60 dark:bg-[#2A4436]/40 text-white/50 cursor-not-allowed'
+                    ? 'bg-[#1D1D1F] hover:bg-[#3A3A3C] dark:bg-white dark:hover:bg-[#E5E5EA] text-white dark:text-black shadow-sm active:scale-95 cursor-pointer'
+                    : 'bg-[#E5E5EA] dark:bg-[#2C2C2E] text-[#86868B] dark:text-[#636366] cursor-not-allowed'
                 }`}
                 title="Send message"
                 aria-label="Send message"

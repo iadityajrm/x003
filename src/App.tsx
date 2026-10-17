@@ -210,7 +210,7 @@ export function App() {
     if (viewMode === 'website') {
       document.documentElement.classList.add('dark');
     } else {
-      const savedTheme = localStorage.getItem('dwellio_guest_theme');
+      const savedTheme = localStorage.getItem('relay_guest_theme') || localStorage.getItem('dwellio_guest_theme');
       if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
       } else {
@@ -234,7 +234,7 @@ export function App() {
       }
 
       // App defaults to light mode unless explicitly set to dark
-      const savedTheme = localStorage.getItem('dwellio_guest_theme');
+      const savedTheme = localStorage.getItem('relay_guest_theme') || localStorage.getItem('dwellio_guest_theme');
       if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
       } else {
@@ -407,28 +407,28 @@ export function App() {
   const showComposer = currentScreen !== 'play';
 
   return (
-    <div className={`h-[100dvh] w-full bg-[#ECE8E1] dark:bg-[#0D0C0A] text-[#1C1B18] dark:text-[#EDEAE4] flex flex-col items-center justify-center overflow-hidden selection:bg-[#2A4436]/20 selection:text-[#1C1B18] relative transition-all ${
+    <div className={`h-[100dvh] w-full bg-[#E5E5EA] dark:bg-[#000000] text-[#1D1D1F] dark:text-[#F5F5F7] flex flex-col items-center justify-center overflow-hidden selection:bg-black/10 selection:text-black relative transition-all ${
       isPageExiting ? 'animate-page-fade-out' : 'animate-page-fade-in'
     }`}>
       {/* Quick Website Switcher Pill for Desktop users previewing the live demo */}
       <div className="hidden lg:flex items-center gap-3 absolute top-5 left-6 z-40">
         <button
           onClick={handleBackToWebsite}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/90 dark:bg-[#1E1D1A]/90 hover:bg-white dark:hover:bg-[#1E1D1A] text-xs font-semibold text-[#1C1B18] dark:text-white border border-black/10 dark:border-white/10 shadow-soft-sm backdrop-blur-md transition-all cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/90 dark:bg-[#1C1C1E]/90 hover:bg-white dark:hover:bg-[#2C2C2E] text-xs font-semibold text-[#1D1D1F] dark:text-white border border-black/10 dark:border-white/10 shadow-soft-sm backdrop-blur-md transition-all cursor-pointer"
         >
-          <span>← Dwellio Website</span>
+          <span>← Relay Website</span>
         </button>
-        <span className="text-[11px] text-[#78756E] dark:text-neutral-400 bg-black/5 dark:bg-white/5 px-2.5 py-1 rounded-lg">
+        <span className="text-[11px] text-[#86868B] dark:text-neutral-400 bg-black/5 dark:bg-white/5 px-2.5 py-1 rounded-lg">
           Live Guest Demo ({property.name})
         </span>
       </div>
 
       {/* Mobile App Screen Frame - fixed viewport height, never scrolls off screen */}
-      <div className="w-full max-w-md h-[100dvh] flex flex-col bg-[#F6F4F0] dark:bg-[#151412] shadow-2xl relative border-x border-black/5 dark:border-white/10 overflow-hidden transition-colors">
+      <div className="w-full max-w-md h-[100dvh] flex flex-col bg-[#F5F5F7] dark:bg-[#000000] shadow-2xl relative border-x border-black/5 dark:border-white/10 overflow-hidden transition-colors">
         
         {/* Pinned Header (Permanently pinned at top of the frame, never scrolls away) */}
         {(isHomeScreen || currentScreen === 'chat') && (
-          <div className="shrink-0 z-30 w-full bg-[#F6F4F0]/95 dark:bg-[#1A1916]/95 backdrop-blur-md">
+          <div className="shrink-0 z-30 w-full bg-[#F5F5F7]/95 dark:bg-[#000000]/95 backdrop-blur-md">
             <Header
               property={property}
               onOpenCall={() => navigateTo('call')}

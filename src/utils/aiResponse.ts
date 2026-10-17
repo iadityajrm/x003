@@ -38,7 +38,9 @@ export function getSmartPropertyBackup(
 
   // Helper: check if guest unlocked protected codes
   const isUnlocked = typeof window !== 'undefined' ? 
-    (sessionStorage.getItem(`dwellio_unlocked_guest_${property.slug}`) === 'true' || 
+    (sessionStorage.getItem(`relay_unlocked_guest_${property.slug}`) === 'true' || 
+     localStorage.getItem(`relay_unlocked_guest_${property.slug}`) === 'true' ||
+     sessionStorage.getItem(`dwellio_unlocked_guest_${property.slug}`) === 'true' || 
      localStorage.getItem(`dwellio_unlocked_guest_${property.slug}`) === 'true') : true;
 
   // 1. Photo Attachment

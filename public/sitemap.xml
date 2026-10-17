@@ -4,56 +4,56 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- Dwellio Homepage & Main Landing Page -->
+  <!-- Relay Homepage & Main Landing Page by FramewrkLabs -->
   <url>
-    <loc>https://dwellio.app/</loc>
-    <lastmod>2026-10-15</lastmod>
+    <loc>https://relay.framewrklabs.com/</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <!-- Live Demo / Interactive Guest Assistant -->
   <url>
-    <loc>https://dwellio.app/demo</loc>
-    <lastmod>2026-10-15</lastmod>
+    <loc>https://relay.framewrklabs.com/demo</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <!-- Featured Stay Demos -->
   <url>
-    <loc>https://dwellio.app/stay/cedar-house</loc>
-    <lastmod>2026-10-15</lastmod>
+    <loc>https://relay.framewrklabs.com/stay/cedar-house</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
 
   <url>
-    <loc>https://dwellio.app/stay/pine-crest-villa</loc>
-    <lastmod>2026-10-15</lastmod>
+    <loc>https://relay.framewrklabs.com/stay/pine-crest-villa</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://dwellio.app/stay/seaside-haven</loc>
-    <lastmod>2026-10-15</lastmod>
+    <loc>https://relay.framewrklabs.com/stay/seaside-haven</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Host Client Portal -->
   <url>
-    <loc>https://dwellio.app/client</loc>
-    <lastmod>2026-10-15</lastmod>
+    <loc>https://relay.framewrklabs.com/client</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Admin Portal -->
   <url>
-    <loc>https://dwellio.app/admin</loc>
-    <lastmod>2026-10-15</lastmod>
+    <loc>https://relay.framewrklabs.com/admin</loc>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

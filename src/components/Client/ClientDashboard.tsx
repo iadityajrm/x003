@@ -54,7 +54,8 @@ interface ClientDashboardProps {
   onNavigateToAdmin: () => void;
 }
 
-const AUTH_STORAGE_KEY = 'dwellio_client_portal_session_v2';
+const AUTH_STORAGE_KEY = 'relay_client_portal_session_v2';
+const LEGACY_AUTH_STORAGE_KEY = 'dwellio_client_portal_session_v2';
 
 type MobileTab = 'status' | 'location' | 'guide' | 'places';
 
@@ -91,7 +92,8 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   // Session authentication state (requires login if no active session stored)
   const [session, setSession] = useState<ClientSession | null>(() => {
     if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem(AUTH_STORAGE_KEY) || localStorage.getItem(AUTH_STORAGE_KEY);
+      const stored = sessionStorage.getItem(AUTH_STORAGE_KEY) || sessionStorage.getItem(LEGACY_AUTH_STORAGE_KEY) ||
+                     localStorage.getItem(AUTH_STORAGE_KEY) || localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
       if (stored) {
         try {
           return JSON.parse(stored);
@@ -125,7 +127,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   }, [assignedSlugs, currentSlug]);
 
   // Login form state
-  const [loginEmail, setLoginEmail] = useState<string>(clients[0]?.email || 'sarah@dwellio.com');
+  const [loginEmail, setLoginEmail] = useState<string>(clients[0]?.email || 'sarah@relay.framewrklabs.com');
   const [passcode, setPasscode] = useState<string>('host123');
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(false);
@@ -276,7 +278,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
         setLoginError(null);
         setIsLoadingAuth(false);
-        showToast(`Signed in to dwellio via Neon as ${result.user.name}`);
+        showToast(`Signed in to Relay via Neon as ${result.user.name}`);
         return;
       } else if (result.error && !result.error.toLowerCase().includes('not found')) {
         setLoginError(result.error);
@@ -315,13 +317,13 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
     setLoginError(null);
     setIsLoadingAuth(false);
-    showToast(`Signed in to dwellio as ${matchedClient.name}`);
+    showToast(`Signed in to Relay as ${matchedClient.name}`);
   };
 
   const handleGoogleSignIn = async (chosenEmail?: string, chosenName?: string) => {
     setIsLoadingAuth(true);
     setLoginError(null);
-    const emailToUse = (chosenEmail || loginEmail || 'sarah@dwellio.com').trim().toLowerCase();
+    const emailToUse = (chosenEmail || loginEmail || 'sarah@relay.framewrklabs.com').trim().toLowerCase();
     const nameToUse = chosenName || (clients.find(c => c.email.toLowerCase() === emailToUse)?.name) || emailToUse.split('@')[0];
 
     try {
@@ -392,7 +394,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     setSession(null);
     sessionStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem(AUTH_STORAGE_KEY);
-    showToast('Signed out of dwellio');
+    showToast('Signed out of Relay');
   };
 
   // Guest Stay Status Toggle
@@ -528,40 +530,40 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           {/* Scrollable Login Container */}
           <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-8 flex flex-col justify-between">
             <div className="space-y-5 my-auto">
-              {/* Header: dwellio branding */}
+              {/* Header: Relay branding */}
               <div className="text-center space-y-2">
-                <div className="w-14 h-14 rounded-2xl bg-[#2A4436] text-white flex items-center justify-center mx-auto shadow-sm font-serif font-bold text-2xl">
-                  d
+                <div className="w-14 h-14 rounded-2xl bg-[#1D1D1F] text-white flex items-center justify-center mx-auto shadow-sm font-serif font-bold text-2xl">
+                  R
                 </div>
                 <div>
-                  <h1 className="font-serif text-2xl font-bold text-[#1C1B18] dark:text-white tracking-tight">
-                    dwellio
+                  <h1 className="font-serif text-2xl font-bold text-[#1D1D1F] dark:text-white tracking-tight">
+                    Relay
                   </h1>
-                  <span className="text-[11px] font-bold text-[#78756E] dark:text-neutral-400 uppercase tracking-wider block mt-0.5">
-                    Client Host Portal
+                  <span className="text-[11px] font-bold text-[#86868B] dark:text-[#A1A1A6] uppercase tracking-wider block mt-0.5">
+                    Client Host Portal · FramewrkLabs
                   </span>
                 </div>
-                <p className="text-xs text-[#78756E] dark:text-neutral-400 max-w-xs mx-auto leading-relaxed">
+                <p className="text-xs text-[#86868B] dark:text-[#A1A1A6] max-w-xs mx-auto leading-relaxed">
                   Sign in to manage your assigned properties, keypad codes, and guest instructions.
                 </p>
               </div>
 
               {/* Admin Governed Account Notice */}
-              <div className="p-3.5 rounded-2xl bg-[#EBF2EC] dark:bg-[#2A4436]/20 border border-[#2A4436]/20 dark:border-[#78A88E]/30 text-[11px] text-[#2A4436] dark:text-[#78A88E] leading-relaxed flex items-start gap-2.5">
-                <ShieldAlert className="w-4 h-4 text-[#2A4436] shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-2xl bg-[#F5F5F7] dark:bg-white/5 border border-black/10 dark:border-white/10 text-[11px] text-[#1D1D1F] dark:text-neutral-300 leading-relaxed flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-[#1D1D1F] dark:text-white shrink-0 mt-0.5" />
                 <div>
-                  <strong>Admin-Provisioned Accounts Only:</strong> Client accounts are created by your dwellio Administrator. If you need access or property assignment, contact your admin.
+                  <strong>Admin-Provisioned Accounts Only:</strong> Client accounts are created by your Relay Administrator. If you need access or property assignment, contact your admin.
                 </div>
               </div>
 
               {/* Google Sign-In & Email/Password Login Form */}
-              <div className="space-y-4 bg-white dark:bg-[#1E1D1A] p-5 rounded-3xl border border-black/5 dark:border-white/10 shadow-soft-card transition-colors">
+              <div className="space-y-4 bg-white dark:bg-[#1C1C1E] p-5 rounded-3xl border border-black/5 dark:border-white/10 shadow-soft-card transition-colors">
                 {/* 1. Continue with Google Button */}
                 <button
                   type="button"
                   onClick={() => handleGoogleSignIn()}
                   disabled={isLoadingAuth}
-                  className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-[#151412] hover:bg-[#FAF8F5] dark:hover:bg-white/5 border border-black/10 dark:border-white/15 text-xs font-bold text-[#1C1B18] dark:text-white shadow-soft-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-[#151412] hover:bg-[#F5F5F7] dark:hover:bg-white/5 border border-black/10 dark:border-white/15 text-xs font-bold text-[#1D1D1F] dark:text-white shadow-soft-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
                 >
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                     <path
@@ -587,31 +589,31 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 {/* Divider */}
                 <div className="relative flex items-center justify-center my-3">
                   <div className="border-t border-black/10 dark:border-white/10 w-full" />
-                  <span className="bg-white dark:bg-[#1E1D1A] px-2.5 text-[10px] font-bold uppercase tracking-wider text-[#78756E] dark:text-neutral-400 shrink-0">
+                  <span className="bg-white dark:bg-[#1C1C1E] px-2.5 text-[10px] font-bold uppercase tracking-wider text-[#86868B] dark:text-[#A1A1A6] shrink-0">
                     or with email & password
                   </span>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-3.5">
                   <div>
-                    <label className="block text-xs font-bold text-[#1C1B18] dark:text-white mb-1.5">
+                    <label className="block text-xs font-bold text-[#1D1D1F] dark:text-white mb-1.5">
                       Client Email
                     </label>
                     <input
                       type="email"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder="e.g. sarah@dwellio.com"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] dark:bg-[#151412] border border-black/10 dark:border-white/15 text-xs font-semibold text-[#1C1B18] dark:text-white focus:outline-none focus:border-[#2A4436] dark:focus:border-[#78A88E] transition-all"
+                      placeholder="e.g. sarah@relay.framewrklabs.com"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#F5F5F7] dark:bg-[#151412] border border-black/10 dark:border-white/15 text-xs font-semibold text-[#1D1D1F] dark:text-white focus:outline-none focus:border-[#1D1D1F] dark:focus:border-white transition-all"
                     />
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="block text-xs font-bold text-[#1C1B18] dark:text-white">
+                      <label className="block text-xs font-bold text-[#1D1D1F] dark:text-white">
                         Host Password
                       </label>
-                      <span className="text-[10px] text-[#78756E] dark:text-neutral-400">Default: host123</span>
+                      <span className="text-[10px] text-[#86868B] dark:text-[#A1A1A6]">Default: host123</span>
                     </div>
                     <div className="relative">
                       <input
@@ -619,9 +621,9 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                         value={passcode}
                         onChange={(e) => setPasscode(e.target.value)}
                         placeholder="Enter password..."
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F4F0] dark:bg-[#151412] border border-black/10 dark:border-white/15 text-xs text-[#1C1B18] dark:text-white focus:outline-none focus:border-[#2A4436] dark:focus:border-[#78A88E] transition-all"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#F5F5F7] dark:bg-[#151412] border border-black/10 dark:border-white/15 text-xs text-[#1D1D1F] dark:text-white focus:outline-none focus:border-[#1D1D1F] dark:focus:border-white transition-all"
                       />
-                      <Lock className="w-4 h-4 text-[#78756E] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <Lock className="w-4 h-4 text-[#86868B] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   </div>
 
@@ -634,7 +636,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   <button
                     type="submit"
                     disabled={isLoadingAuth}
-                    className="w-full py-3 rounded-2xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full py-3 rounded-2xl bg-[#1D1D1F] hover:bg-[#3A3A3C] text-white text-xs font-bold shadow-soft-sm active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <span>{isLoadingAuth ? 'Verifying with Neon...' : 'Sign In with Password'}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -707,33 +709,33 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         )}
 
         {/* 1. Pinned Top App Bar */}
-        <header className="shrink-0 z-30 bg-white/95 dark:bg-[#1A1916]/95 backdrop-blur-md border-b border-black/5 dark:border-white/10 px-4 py-3 flex items-center justify-between">
+        <header className="shrink-0 z-30 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md border-b border-black/5 dark:border-white/10 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-[#2A4436] text-white flex items-center justify-center shrink-0 font-serif font-bold text-sm">
-              d
+            <div className="w-8 h-8 rounded-xl bg-[#1D1D1F] text-white flex items-center justify-center shrink-0 font-serif font-bold text-sm">
+              R
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <h1 className="font-serif text-sm font-bold text-[#1C1B18] dark:text-white truncate leading-tight">
+                <h1 className="font-serif text-sm font-bold text-[#1D1D1F] dark:text-white truncate leading-tight">
                   {name}
                 </h1>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#EBF2EC] dark:bg-[#2A4436]/30 text-[#2A4436] dark:text-[#78A88E] shrink-0">
-                  dwellio
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#F5F5F7] dark:bg-white/10 text-[#1D1D1F] dark:text-white shrink-0">
+                  Relay
                 </span>
               </div>
-              <p className="text-[11px] text-[#78756E] dark:text-neutral-400 truncate leading-tight">
+              <p className="text-[11px] text-[#86868B] dark:text-[#A1A1A6] truncate leading-tight">
                 {session.name} · {location}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Property Selector: ONLY lists properties assigned to this client! */}
+            {/* Property Selector */}
             {clientProperties.length > 1 && (
               <select
                 value={currentSlug}
                 onChange={(e) => setCurrentSlug(e.target.value)}
-                className="text-xs font-semibold text-[#1C1B18] bg-[#F6F4F0] hover:bg-[#ECE8E1] border border-black/10 px-2 py-1.5 rounded-xl focus:outline-none cursor-pointer max-w-[110px] truncate"
+                className="text-xs font-semibold text-[#1D1D1F] bg-[#F5F5F7] hover:bg-[#E5E5EA] border border-black/10 px-2 py-1.5 rounded-xl focus:outline-none cursor-pointer max-w-[110px] truncate"
               >
                 {clientProperties.map((p) => (
                   <option key={p.slug} value={p.slug}>
@@ -747,7 +749,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
             {clientProperties.length > 0 && (
               <button
                 onClick={() => onNavigateToGuest(currentSlug)}
-                className="p-2 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white active:scale-95 transition-all"
+                className="p-2 rounded-xl bg-[#1D1D1F] hover:bg-[#3A3A3C] text-white active:scale-95 transition-all cursor-pointer"
                 title="Open Guest App"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -757,8 +759,8 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
             {/* Logout */}
             <button
               onClick={handleLogout}
-              className="p-2 rounded-xl text-[#78756E] hover:text-[#1C1B18] hover:bg-black/5 transition-colors"
-              title="Sign out of dwellio"
+              className="p-2 rounded-xl text-[#86868B] hover:text-[#1D1D1F] hover:bg-black/5 transition-colors cursor-pointer"
+              title="Sign out of Relay"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
@@ -769,21 +771,21 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         {clientProperties.length === 0 ? (
           /* Empty State: No Properties Assigned to this Client */
           <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-8 flex flex-col items-center justify-center text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200 flex items-center justify-center">
               <Building2 className="w-8 h-8 stroke-[1.8]" />
             </div>
             <div className="space-y-1">
-              <h2 className="font-serif text-lg font-bold text-[#1C1B18]">
+              <h2 className="font-serif text-lg font-bold text-[#1D1D1F]">
                 No Properties Assigned
               </h2>
-              <p className="text-xs text-[#78756E] max-w-xs leading-relaxed">
+              <p className="text-xs text-[#86868B] max-w-xs leading-relaxed">
                 Welcome, <strong>{session.name}</strong>! Your client account is active, but your administrator has not assigned any properties to you yet.
               </p>
             </div>
-            <div className="p-4 rounded-2xl bg-white border border-black/5 shadow-soft-sm text-xs text-[#5C5A55] max-w-xs text-left space-y-2">
-              <div className="font-bold text-[#1C1B18]">What to do:</div>
+            <div className="p-4 rounded-2xl bg-white border border-black/5 shadow-soft-sm text-xs text-[#636366] max-w-xs text-left space-y-2">
+              <div className="font-bold text-[#1D1D1F]">What to do:</div>
               <p>
-                Please contact your dwellio administrator to assign your vacation rentals to <code>{session.email}</code>.
+                Please contact your Relay administrator to assign your vacation rentals to <code>{session.email}</code>.
               </p>
             </div>
             <button
@@ -1232,31 +1234,31 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                     className="w-full p-3.5 rounded-2xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] leading-relaxed focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all resize-y"
                   />
 
-                  <span className="text-[10px] text-[#78756E] block">
+                  <span className="text-[10px] text-[#86868B] block">
                     Guests can read this single guide anytime in their app under "House Guide".
                   </span>
                 </div>
 
-                {/* Dwellio AI Assistant Property Instructions */}
+                {/* Relay AI Assistant Property Instructions */}
                 <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3.5">
                   <div className="border-b border-black/5 pb-2.5 flex items-start justify-between gap-2">
                     <div>
-                      <h3 className="font-serif text-sm font-bold text-[#1C1B18] flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-[#2A4436]" />
-                        <span>Dwellio AI Assistant Instructions</span>
+                      <h3 className="font-serif text-sm font-bold text-[#1D1D1F] flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[#1D1D1F]" />
+                        <span>Relay AI Assistant Instructions</span>
                       </h3>
-                      <p className="text-[11px] text-[#78756E] mt-0.5">
-                        Teach Dwellio AI special rules, local secrets, house quirks, and tone specific to this property.
+                      <p className="text-[11px] text-[#86868B] mt-0.5">
+                        Teach Relay AI special rules, local secrets, house quirks, and tone specific to this property.
                       </p>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EBF2EC] text-[#2A4436] shrink-0">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5F5F7] text-[#1D1D1F] border border-black/5 shrink-0">
                       Live AI Prompt
                     </span>
                   </div>
 
                   {/* Quick Inspiration Snippets */}
                   <div>
-                    <span className="text-[10px] font-bold text-[#78756E] uppercase tracking-wider block mb-1.5">
+                    <span className="text-[10px] font-bold text-[#86868B] uppercase tracking-wider block mb-1.5">
                       Quick Suggestions (Tap to insert)
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -1275,7 +1277,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                               prev.trim() ? `${prev.trim()}\n• ${preset.text}` : `• ${preset.text}`
                             );
                           }}
-                          className="text-[11px] font-semibold px-2.5 py-1 rounded-xl bg-[#F6F4F0] hover:bg-[#EBF2EC] text-[#2A4436] border border-black/5 transition-all active:scale-95 cursor-pointer"
+                          className="text-[11px] font-semibold px-2.5 py-1 rounded-xl bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] border border-black/5 transition-all active:scale-95 cursor-pointer"
                         >
                           {preset.label}
                         </button>
@@ -1284,18 +1286,18 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
-                      Custom Instructions for Dwellio AI
+                    <label className="block text-xs font-semibold text-[#1D1D1F] mb-1">
+                      Custom Instructions for Relay AI
                     </label>
                     <textarea
                       rows={5}
                       value={customAiInstructions}
                       onChange={(e) => setCustomAiInstructions(e.target.value)}
                       placeholder="e.g. Always remind guests to lock the bear-proof latch on the deck. Suggest taking morning walks to the shoreline and mention that the cedar hot tub is preheated to 102°F. Maintain a warm, friendly, alpine-cabin host tone..."
-                      className="w-full p-3.5 rounded-2xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] leading-relaxed focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all resize-y"
+                      className="w-full p-3.5 rounded-2xl bg-[#F5F5F7] border border-black/10 text-xs text-[#1D1D1F] leading-relaxed focus:outline-none focus:border-[#1D1D1F] focus:bg-white transition-all resize-y"
                     />
-                    <div className="flex items-center justify-between text-[10px] text-[#78756E] mt-1">
-                      <span>Directly injected into Dwellio's Gemini system prompt for guests</span>
+                    <div className="flex items-center justify-between text-[10px] text-[#86868B] mt-1">
+                      <span>Directly injected into Relay's Gemini system prompt for guests</span>
                       <span>{customAiInstructions.length} characters</span>
                     </div>
                   </div>
@@ -1303,7 +1305,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   <button
                     type="button"
                     onClick={handleSaveAll}
-                    className="w-full py-2.5 rounded-xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-[#1D1D1F] hover:bg-black text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>Save AI Assistant Instructions</span>
@@ -1313,18 +1315,18 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 {/* Host Contact Info */}
                 <div className="bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft-card space-y-3">
                   <div className="border-b border-black/5 pb-2.5">
-                    <h3 className="font-serif text-sm font-bold text-[#1C1B18] flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-[#2A4436]" />
+                    <h3 className="font-serif text-sm font-bold text-[#1D1D1F] flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-[#1D1D1F]" />
                       <span>Host Contact</span>
                     </h3>
-                    <p className="text-[11px] text-[#78756E] mt-0.5">
+                    <p className="text-[11px] text-[#86868B] mt-0.5">
                       How guests reach you for questions or emergencies.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                      <label className="block text-xs font-semibold text-[#1D1D1F] mb-1">
                         Host Name
                       </label>
                       <input
@@ -1332,12 +1334,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                         value={hostName}
                         onChange={(e) => setHostName(e.target.value)}
                         placeholder="e.g. Sarah Jenkins"
-                        className="w-full px-3 py-2 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+                        className="w-full px-3 py-2 rounded-xl bg-[#F5F5F7] border border-black/10 text-xs text-[#1D1D1F] focus:outline-none focus:border-[#1D1D1F] focus:bg-white transition-all"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-[#1C1B18] mb-1">
+                      <label className="block text-xs font-semibold text-[#1D1D1F] mb-1">
                         Phone Number
                       </label>
                       <input
@@ -1345,7 +1347,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                         value={hostPhone}
                         onChange={(e) => setHostPhone(e.target.value)}
                         placeholder="e.g. (555) 234-5678"
-                        className="w-full px-3 py-2 rounded-xl bg-[#F6F4F0] border border-black/10 text-xs text-[#1C1B18] focus:outline-none focus:border-[#2A4436] focus:bg-white transition-all"
+                        className="w-full px-3 py-2 rounded-xl bg-[#F5F5F7] border border-black/10 text-xs text-[#1D1D1F] focus:outline-none focus:border-[#1D1D1F] focus:bg-white transition-all"
                       />
                     </div>
                   </div>
@@ -1353,7 +1355,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   <button
                     type="button"
                     onClick={handleSaveAll}
-                    className="w-full py-3 rounded-2xl bg-[#2A4436] hover:bg-[#20362B] text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                    className="w-full py-3 rounded-2xl bg-[#1D1D1F] hover:bg-black text-white text-xs font-bold shadow-soft-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-2"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>Save Guide & Wi-Fi</span>
