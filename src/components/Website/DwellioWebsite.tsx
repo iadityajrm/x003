@@ -6,7 +6,17 @@ import {
   ShieldCheck,
   Compass,
   Wifi,
-  Building2
+  Building2,
+  QrCode,
+  Languages,
+  Mic,
+  UtensilsCrossed,
+  Sliders,
+  Check,
+  Bot,
+  Zap,
+  Globe,
+  ConciergeBell
 } from 'lucide-react';
 import { PROPERTIES } from '../../data/properties';
 import { PropertyData } from '../../types';
@@ -26,6 +36,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
 }) => {
   const [selectedDemoSlug, setSelectedDemoSlug] = useState('cedar-house');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [selectedPlanModal, setSelectedPlanModal] = useState<string | null>(null);
 
   // Enforce dark mode on landing page by default
   useEffect(() => {
@@ -77,6 +88,66 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
       title: 'Fail-Safe Offline Backup',
       description: 'Key property details remain accessible even during network interruptions.',
       icon: <Wifi className="w-5 h-5 text-white" />,
+    },
+  ];
+
+  const plans = [
+    {
+      id: 'simple',
+      name: 'Simple Assistant',
+      badge: 'Starter',
+      popular: false,
+      tagline: 'Textual AI assistance in clean English for quick answers & essentials.',
+      description: 'Ideal for independent rentals, Airbnbs, and boutique stays wanting instant guest communication.',
+      icon: <Bot className="w-6 h-6 text-white" />,
+      features: [
+        'Instant QR Code access (no app install required)',
+        'English-only text conversational AI concierge',
+        'Answers Wi-Fi, property guidelines & amenities 24/7',
+        'Curated nearby destinations, attractions & dining spots',
+        'Digital food menu viewing & item inquiries',
+        'Hybrid remote architecture: 100% remote setup in minutes',
+        'Essential offline fallback support for critical info',
+      ],
+      ctaText: 'Get Started with Simple',
+    },
+    {
+      id: 'advanced',
+      name: 'Advanced Assistant',
+      badge: 'Most Popular',
+      popular: true,
+      tagline: 'Multilingual AI with natural speech & interactive ordering capabilities.',
+      description: 'Engineered for international guests and busy luxury villas looking for frictionless voice guidance.',
+      icon: <Mic className="w-6 h-6 text-white" />,
+      features: [
+        'Everything in Simple Assistant, plus:',
+        'Full Multilingual Support (auto-detects guest language)',
+        'Two-way Voice & Speech Assistant (natural listening & speaking)',
+        'Interactive digital food menu inquiries & instant order placement',
+        'Dynamic local recommendations with interactive navigation',
+        'Hybrid remote deployment: custom knowledge base tuned remotely',
+        'Priority AI model responsiveness & voice tuning',
+      ],
+      ctaText: 'Choose Advanced',
+    },
+    {
+      id: 'integrated',
+      name: 'Integrated Assistant',
+      badge: 'Enterprise & Resort',
+      popular: false,
+      tagline: 'Tailored, end-to-end bespoke experience connected with your front desk.',
+      description: 'Designed for boutique hotels, serviced apartments, and resorts needing direct reception synergy.',
+      icon: <ConciergeBell className="w-6 h-6 text-white" />,
+      features: [
+        'Everything in Advanced Assistant, plus:',
+        'Deep Reception & Front Desk integration (live handover & alerts)',
+        'Custom ordering workflow with kitchen/reception dispatch',
+        'Tailored brand styling, custom domain & personalized greetings',
+        'VIP guest routing, special request & room service ticketing',
+        'Hybrid remote setup with dedicated onboarding engineer',
+        '24/7 host emergency hotline routing & bespoke API integration',
+      ],
+      ctaText: 'Contact for Integrated',
     },
   ];
 
@@ -142,6 +213,12 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
           <nav className="hidden md:flex items-center gap-7 text-xs font-medium text-[#86868B]">
             <a href="#about" className="hover:text-white transition-colors">
               About
+            </a>
+            <a href="#solution" className="hover:text-white transition-colors">
+              How It Works
+            </a>
+            <a href="#plans" className="hover:text-white transition-colors">
+              Plans & Pricing
             </a>
             <a href="#features" className="hover:text-white transition-colors">
               Features
@@ -277,6 +354,179 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               </p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ─── HOW IT WORKS / WHAT WE OFFER (SCAN QR TO ASSISTANT) ─── */}
+      <section id="solution" className="py-24 sm:py-32 bg-[#050505] border-t border-white/10">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="reveal-from-top text-center space-y-4 max-w-3xl mx-auto mb-16">
+            <span className="text-[11px] uppercase tracking-widest font-mono font-medium text-[#86868B]">
+              The Core Solution
+            </span>
+            <h2 className="font-serif text-3xl sm:text-5xl font-bold text-white leading-tight">
+              One QR Scan. Complete Hospitality.
+            </h2>
+            <p className="text-sm sm:text-base text-[#86868B] leading-relaxed">
+              We sell a radically simple guest solution: guests scan a sleek QR code in their room or villa and immediately receive a personal AI assistant. No app download, no account creation, no friction.
+            </p>
+          </div>
+
+          {/* Solution Pillars */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <div className="reveal-from-top p-8 rounded-3xl bg-[#141416] border border-white/10 space-y-4 hover:border-white/20 transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
+                <QrCode className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-serif text-xl font-bold text-white">Instant AI Concierge</h3>
+              <p className="text-xs sm:text-sm text-[#86868B] leading-relaxed">
+                Guests instantly enquire about Wi-Fi credentials, air conditioning, check-in instructions, parking, house guidelines, and all property services at any hour of the day or night.
+              </p>
+            </div>
+
+            <div className="reveal-from-top p-8 rounded-3xl bg-[#141416] border border-white/10 space-y-4 hover:border-white/20 transition-all" style={{ transitionDelay: '150ms' }}>
+              <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
+                <Compass className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-serif text-xl font-bold text-white">Nearby Explorations</h3>
+              <p className="text-xs sm:text-sm text-[#86868B] leading-relaxed">
+                Recommends scenic viewpoints, popular attractions, nearby destinations, hidden gems, and local cafes with directions, distance estimates, and opening hours.
+              </p>
+            </div>
+
+            <div className="reveal-from-top p-8 rounded-3xl bg-[#141416] border border-white/10 space-y-4 hover:border-white/20 transition-all" style={{ transitionDelay: '300ms' }}>
+              <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
+                <UtensilsCrossed className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-serif text-xl font-bold text-white">Digital Food Menu & Ordering</h3>
+              <p className="text-xs sm:text-sm text-[#86868B] leading-relaxed">
+                Incorporate your in-house dining or partner restaurant menu. Guests can browse photos, enquire about ingredients and dietary options, and place food orders with confidence.
+              </p>
+            </div>
+          </div>
+
+          {/* Hybrid Architecture Remote Setup Banner */}
+          <div className="reveal-from-top mt-10 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#1C1C1E] to-[#121214] border border-white/15 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-2 text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-mono uppercase tracking-wider text-white">
+                <Zap className="w-3.5 h-3.5 text-white" />
+                Hybrid Architecture
+              </div>
+              <h4 className="font-serif text-lg sm:text-xl font-bold text-white">
+                100% Remote, Effortless Setup
+              </h4>
+              <p className="text-xs sm:text-sm text-[#86868B] max-w-2xl leading-relaxed">
+                All tiers are engineered with a hybrid approach so your property’s digital concierge can be configured, tested, and published completely remotely without any on-site hardware or technicians.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                const el = document.getElementById('plans');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="shrink-0 px-6 py-3 rounded-full bg-white hover:bg-[#E5E5EA] text-[#000000] text-xs font-semibold shadow-lg transition-all active:scale-95 cursor-pointer"
+            >
+              View Tiers & Plans
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── THREE PLANS & TIERS SECTION ─── */}
+      <section id="plans" className="py-24 sm:py-32 max-w-6xl mx-auto px-6">
+        <div className="reveal-from-top text-center space-y-4 max-w-3xl mx-auto mb-16">
+          <span className="text-[11px] uppercase tracking-widest font-mono font-medium text-[#86868B]">
+            Flexible Plans
+          </span>
+          <h2 className="font-serif text-3xl sm:text-5xl font-bold text-white leading-tight">
+            Tailored Tiers for Every Host & Hotel
+          </h2>
+          <p className="text-sm sm:text-base text-[#86868B] leading-relaxed">
+            Choose the level of intelligence your guests experience. Each tier is fully remote-deployable and adapts seamlessly to your property.
+          </p>
+        </div>
+
+        {/* 3 Tier Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+          {plans.map((plan, idx) => (
+            <div
+              key={plan.id}
+              className={`reveal-from-top relative rounded-3xl p-8 sm:p-9 flex flex-col justify-between transition-all ${
+                plan.popular
+                  ? 'bg-[#18181B] border-2 border-white/40 shadow-[0_20px_50px_rgba(255,255,255,0.06)] scale-[1.02] z-10'
+                  : 'bg-[#141416]/90 border border-white/10 hover:border-white/20'
+              }`}
+              style={{ transitionDelay: `${idx * 150}ms` }}
+            >
+              {/* Badge */}
+              <div className="flex items-center justify-between mb-6">
+                <span className={`text-[10px] uppercase font-mono font-bold tracking-wider px-3 py-1 rounded-full border ${
+                  plan.popular
+                    ? 'bg-white text-black border-white'
+                    : 'bg-white/10 text-white/80 border-white/15'
+                }`}>
+                  {plan.badge}
+                </span>
+                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
+                  {plan.icon}
+                </div>
+              </div>
+
+              {/* Title & Description */}
+              <div className="space-y-3">
+                <h3 className="font-serif text-2xl font-bold text-white">
+                  {plan.name}
+                </h3>
+                <p className="text-xs font-medium text-white/90">
+                  {plan.tagline}
+                </p>
+                <p className="text-xs text-[#86868B] leading-relaxed">
+                  {plan.description}
+                </p>
+              </div>
+
+              {/* Divider */}
+              <div className="my-6 border-t border-white/10" />
+
+              {/* Features List */}
+              <div className="space-y-3 mb-8 flex-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#86868B]">
+                  Included Capabilities:
+                </span>
+                <ul className="space-y-2.5 text-xs text-[#D1D1D6]">
+                  {plan.features.map((feature, fIdx) => (
+                    <li key={fIdx} className="flex items-start gap-2.5 leading-relaxed">
+                      <div className="mt-0.5 rounded-full p-0.5 bg-white/10 text-white shrink-0">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                      <span className={fIdx === 0 && plan.popular ? 'text-white font-medium' : ''}>
+                        {feature}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Action Button */}
+              <button
+                onClick={() => setSelectedPlanModal(plan.name)}
+                className={`w-full py-3 px-5 rounded-full text-xs font-semibold transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 ${
+                  plan.popular
+                    ? 'bg-white hover:bg-[#E5E5EA] text-[#000000] shadow-xl'
+                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/15'
+                }`}
+              >
+                <span>{plan.ctaText}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Remote Setup Guarantee footnote */}
+        <div className="reveal-from-top mt-12 text-center text-xs text-[#86868B] max-w-xl mx-auto flex items-center justify-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-white shrink-0" />
+          <span>All tiers include hybrid remote deployment, instant QR printable assets, and automated menu syncing.</span>
         </div>
       </section>
 
@@ -439,6 +689,55 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
 
         </div>
       </footer>
+
+      {/* ─── PLAN MODAL (WHEN A USER CLICKS TO SELECT OR INQUIRE ABOUT A PLAN) ─── */}
+      {selectedPlanModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-md bg-[#1C1C1E] border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl text-left">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] uppercase font-mono tracking-widest text-[#86868B]">
+                Setup Plan Selected
+              </span>
+              <button
+                onClick={() => setSelectedPlanModal(null)}
+                className="text-white/60 hover:text-white p-1 rounded-full text-sm font-mono cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <h3 className="font-serif text-2xl font-bold text-white mb-2">
+              {selectedPlanModal}
+            </h3>
+            <p className="text-xs text-[#86868B] mb-6 leading-relaxed">
+              Every tier comes with our hybrid remote setup guarantee. Scan the QR code, preview guest experience, and configure your property details in minutes.
+            </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setSelectedPlanModal(null);
+                  onLaunchDemo(selectedDemoSlug);
+                }}
+                className="w-full py-3 px-4 rounded-full bg-white hover:bg-[#E5E5EA] text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Launch Interactive Demo</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => {
+                  setSelectedPlanModal(null);
+                  onOpenClientPortal();
+                }}
+                className="w-full py-3 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Open Host Dashboard</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
