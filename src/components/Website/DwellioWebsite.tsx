@@ -70,23 +70,23 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
 
   const features = [
     {
-      title: 'Instant Assistance',
-      description: 'Wi-Fi, climate control, and house instructions answered in seconds, 24/7.',
+      title: 'Quick Answers',
+      description: 'Wi-Fi, house rules, and check-in help available 24/7.',
       icon: <Sparkles className="w-5 h-5 text-white" />,
     },
     {
-      title: 'Verified Access',
-      description: 'Smart lock codes and key instructions revealed only to confirmed guests.',
+      title: 'Secure Check-in',
+      description: 'Access details are shared only with confirmed guests.',
       icon: <ShieldCheck className="w-5 h-5 text-white" />,
     },
     {
-      title: 'Curated Recommendations',
-      description: 'Hand-picked cafes, scenic trails, and neighborhood dining favorites.',
+      title: 'Local Spots',
+      description: 'Recommended cafes, food spots, and places to visit nearby.',
       icon: <Compass className="w-5 h-5 text-white" />,
     },
     {
-      title: 'Fail-Safe Offline Backup',
-      description: 'Key property details remain accessible even during network interruptions.',
+      title: 'Offline Ready',
+      description: 'Important details stay readable even without an internet connection.',
       icon: <Wifi className="w-5 h-5 text-white" />,
     },
   ];
@@ -97,76 +97,72 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
       name: 'Simple Assistant',
       badge: 'Starter',
       popular: false,
-      tagline: 'Textual AI assistance in clean English for quick answers & essentials.',
-      description: 'Ideal for independent rentals, Airbnbs, and boutique stays wanting instant guest communication.',
+      tagline: 'Text chat in English for quick answers and essentials.',
+      description: 'Best for standard Airbnb and vacation rentals.',
       icon: <Bot className="w-6 h-6 text-white" />,
       features: [
-        'Instant QR Code access (no app install required)',
-        'English-only text conversational AI concierge',
-        'Answers Wi-Fi, property guidelines & amenities 24/7',
-        'Curated nearby destinations, attractions & dining spots',
-        'Digital food menu viewing & item inquiries',
-        'Hybrid remote architecture: 100% remote setup in minutes',
-        'Essential offline fallback support for critical info',
+        'Scan QR code to start (no app download)',
+        'English text AI assistant',
+        'Answers Wi-Fi, property info & rules',
+        'Nearby places and attractions',
+        'Digital food menu viewing',
+        'Easy remote setup in minutes',
       ],
-      ctaText: 'Get Started with Simple',
+      ctaText: 'Choose Simple',
     },
     {
       id: 'advanced',
-      name: 'Advanced Assistant',
-      badge: 'Most Popular',
+      name: 'Advanced',
+      badge: 'Popular',
       popular: true,
-      tagline: 'Multilingual AI with natural speech & interactive ordering capabilities.',
-      description: 'Engineered for international guests and busy luxury villas looking for frictionless voice guidance.',
+      tagline: 'Multi-language voice and text with digital food ordering.',
+      description: 'Great for international guests and busy stays.',
       icon: <Mic className="w-6 h-6 text-white" />,
       features: [
-        'Everything in Simple Assistant, plus:',
-        'Full Multilingual Support (auto-detects guest language)',
-        'Two-way Voice & Speech Assistant (natural listening & speaking)',
-        'Interactive digital food menu inquiries & instant order placement',
-        'Dynamic local recommendations with interactive navigation',
-        'Hybrid remote deployment: custom knowledge base tuned remotely',
-        'Priority AI model responsiveness & voice tuning',
+        'Everything in Simple',
+        'Multi-language support (auto-detects language)',
+        'Voice & speech assistant (talk or type)',
+        'Food menu questions & order placement',
+        'Interactive nearby recommendations',
+        'Fast remote setup',
       ],
       ctaText: 'Choose Advanced',
     },
     {
       id: 'integrated',
-      name: 'Integrated Assistant',
-      badge: 'Enterprise & Resort',
+      name: 'Integrated',
+      badge: 'Custom',
       popular: false,
-      tagline: 'Tailored, end-to-end bespoke experience connected with your front desk.',
-      description: 'Designed for boutique hotels, serviced apartments, and resorts needing direct reception synergy.',
+      tagline: 'Custom experience connected directly with your reception.',
+      description: 'Ideal for hotels, boutique stays, and serviced apartments.',
       icon: <ConciergeBell className="w-6 h-6 text-white" />,
       features: [
-        'Everything in Advanced Assistant, plus:',
-        'Deep Reception & Front Desk integration (live handover & alerts)',
-        'Custom ordering workflow with kitchen/reception dispatch',
-        'Tailored brand styling, custom domain & personalized greetings',
-        'VIP guest routing, special request & room service ticketing',
-        'Hybrid remote setup with dedicated onboarding engineer',
-        '24/7 host emergency hotline routing & bespoke API integration',
+        'Everything in Advanced',
+        'Direct front desk & reception connection',
+        'Send food orders and guest requests to staff',
+        'Custom branding and colors',
+        'Dedicated onboarding support',
       ],
-      ctaText: 'Contact for Integrated',
+      ctaText: 'Contact Us',
     },
   ];
 
   const faqs = [
     {
-      q: 'Do guests need to install an app?',
-      a: 'No app download is required. Guests simply scan a QR card placed in the home, and Relay opens instantly in any mobile browser.',
+      q: 'Do guests need an app?',
+      a: 'No. Guests scan the QR code and it opens directly in their phone browser.',
     },
     {
-      q: 'How does Relay keep entry codes safe?',
-      a: 'Lockbox and keypad access codes remain hidden until the guest verifies their booking phone number inside the digital guide.',
+      q: 'Can I customize the information?',
+      a: 'Yes. You can edit Wi-Fi, rules, recommendations, and menus anytime from the host portal.',
     },
     {
-      q: 'Can hosts customize instructions for their home?',
-      a: 'Yes. Through the host portal, you can customize check-in guidelines, appliance notes, trash days, and favorite local recommendations.',
+      q: 'How does food ordering work?',
+      a: 'Guests view your digital menu, ask questions about dishes, and place orders directly from their phone.',
     },
     {
-      q: 'What happens if the internet goes down?',
-      a: 'Relay features an offline fallback engine that answers essential property questions even without an active internet connection.',
+      q: 'How hard is it to set up?',
+      a: 'It is all set up remotely. No hardware, no wiring, and no technical knowledge required.',
     },
   ];
 
@@ -218,13 +214,10 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               How It Works
             </a>
             <a href="#plans" className="hover:text-white transition-colors">
-              Plans & Pricing
+              Pricing
             </a>
             <a href="#features" className="hover:text-white transition-colors">
               Features
-            </a>
-            <a href="#properties" className="hover:text-white transition-colors">
-              Properties
             </a>
             <a href="#faq" className="hover:text-white transition-colors">
               FAQs
@@ -233,13 +226,6 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
 
           {/* Right Action Buttons */}
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <button
-              onClick={onOpenClientPortal}
-              className="hidden sm:inline-flex text-xs font-medium text-[#86868B] hover:text-white px-2.5 py-1.5 transition-colors cursor-pointer"
-            >
-              Host Portal
-            </button>
-
             <button
               onClick={() => onLaunchDemo(selectedDemoSlug)}
               className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full bg-white hover:bg-[#E5E5EA] text-[#000000] text-xs font-semibold shadow-sm transition-all active:scale-95 cursor-pointer"
@@ -251,24 +237,21 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
         </header>
       </div>
 
-      {/* ─── HERO SECTION (APPLE SOPHISTICATION, ARCHITECTURE & MONOCHROME FADE) ─── */}
+      {/* ─── HERO SECTION ─── */}
       <section className="relative min-h-[92vh] sm:min-h-screen flex flex-col justify-between pt-28 sm:pt-36 overflow-hidden">
         
-        {/* Architectural Image with Subtle Monochrome Dark Treatment */}
+        {/* Architectural Image */}
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=85"
             alt="Modern luxury architecture"
             className="w-full h-full object-cover object-center brightness-75 contrast-105 saturate-[0.85]"
           />
-          {/* Subtle dark gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/45 to-transparent" />
-          
-          {/* Smooth bottom fade into pure monochrome black background */}
           <div className="absolute bottom-0 inset-x-0 h-56 bg-gradient-to-t from-[#000000] via-[#000000]/85 to-transparent" />
         </div>
 
-        {/* Hero Content (Cascading fade in from above on load) */}
+        {/* Hero Content */}
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center space-y-6 pt-6 sm:pt-12">
           
           <div
@@ -284,14 +267,14 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
             className="reveal-from-top font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.12]"
             style={{ transitionDelay: '250ms' }}
           >
-            Spaces worth coming home to.
+            Guests scan. AI helps. Simple.
           </h1>
 
           <p
             className="reveal-from-top text-sm sm:text-base lg:text-lg text-[#D1D1D6] max-w-2xl mx-auto leading-relaxed font-normal"
             style={{ transitionDelay: '380ms' }}
           >
-            A refined digital guest guide and 24/7 intelligent concierge for vacation rentals. Thoughtfully engineered by FramewrkLabs with zero clutter.
+            A 24/7 digital assistant for your guests. They scan a QR code in their room to get Wi-Fi details, discover nearby places, and order food.
           </p>
 
           {/* Hero CTAs */}
@@ -303,14 +286,17 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               onClick={() => onLaunchDemo(selectedDemoSlug)}
               className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-full bg-white hover:bg-[#E5E5EA] text-[#000000] text-xs sm:text-sm font-semibold shadow-xl active:scale-95 transition-all cursor-pointer"
             >
-              <span>Explore Live Demo</span>
+              <span>Try Live Demo</span>
             </button>
 
             <button
-              onClick={onOpenClientPortal}
+              onClick={() => {
+                const el = document.getElementById('plans');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-full bg-[#1C1C1E]/90 hover:bg-[#2C2C2E] text-white text-xs sm:text-sm font-semibold border border-white/15 shadow-sm active:scale-95 transition-all cursor-pointer"
             >
-              <span>Host Portal</span>
+              <span>See Pricing</span>
             </button>
           </div>
 
@@ -321,21 +307,21 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
 
       </section>
 
-      {/* ─── ABOUT & PHILOSOPHY (FADES IN FROM ABOVE ON SCROLL) ─── */}
+      {/* ─── ABOUT & PHILOSOPHY ─── */}
       <section id="about" className="py-24 sm:py-32 max-w-5xl mx-auto px-6">
         <div className="reveal-from-top text-center space-y-4 max-w-2xl mx-auto">
           <span className="text-[11px] uppercase tracking-widest font-mono font-medium text-[#86868B]">
-            Effortless Hospitality
+            Why Relay
           </span>
           <h2 className="font-serif text-3xl sm:text-5xl font-bold text-white leading-tight">
-            Simple, calm, and always attentive.
+            Less questions for you, better stay for guests.
           </h2>
           <p className="text-sm sm:text-base text-[#86868B] leading-relaxed pt-2">
-            Guests should never spend their first evening searching for Wi-Fi passwords or deciphering appliance manuals. Relay brings clarity to every detail of the stay.
+            No more answering the same Wi-Fi questions late at night. Relay answers guest questions right away so you don’t have to.
           </p>
         </div>
 
-        {/* 4 Feature Cards (Fading in from above with staggered delays) */}
+        {/* 4 Feature Cards */}
         <div id="features" className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {features.map((feat, idx) => (
             <div
@@ -357,18 +343,18 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
         </div>
       </section>
 
-      {/* ─── HOW IT WORKS / WHAT WE OFFER (SCAN QR TO ASSISTANT) ─── */}
+      {/* ─── HOW IT WORKS ─── */}
       <section id="solution" className="py-24 sm:py-32 bg-[#050505] border-t border-white/10">
         <div className="max-w-6xl mx-auto px-6">
           <div className="reveal-from-top text-center space-y-4 max-w-3xl mx-auto mb-16">
             <span className="text-[11px] uppercase tracking-widest font-mono font-medium text-[#86868B]">
-              The Core Solution
+              How It Works
             </span>
             <h2 className="font-serif text-3xl sm:text-5xl font-bold text-white leading-tight">
-              One QR Scan. Complete Hospitality.
+              One QR Code. Everything in One Place.
             </h2>
             <p className="text-sm sm:text-base text-[#86868B] leading-relaxed">
-              We sell a radically simple guest solution: guests scan a sleek QR code in their room or villa and immediately receive a personal AI assistant. No app download, no account creation, no friction.
+              Place a QR code card in the room. Guests scan it with their phone camera to get an instant digital helper. No app to download.
             </p>
           </div>
 
@@ -378,9 +364,9 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
                 <QrCode className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-serif text-xl font-bold text-white">Instant AI Concierge</h3>
+              <h3 className="font-serif text-xl font-bold text-white">Instant Answers</h3>
               <p className="text-xs sm:text-sm text-[#86868B] leading-relaxed">
-                Guests instantly enquire about Wi-Fi credentials, air conditioning, check-in instructions, parking, house guidelines, and all property services at any hour of the day or night.
+                Answers Wi-Fi passwords, parking info, check-in instructions, and house rules whenever guests need them.
               </p>
             </div>
 
@@ -388,9 +374,9 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
                 <Compass className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-serif text-xl font-bold text-white">Nearby Explorations</h3>
+              <h3 className="font-serif text-xl font-bold text-white">Nearby Places</h3>
               <p className="text-xs sm:text-sm text-[#86868B] leading-relaxed">
-                Recommends scenic viewpoints, popular attractions, nearby destinations, hidden gems, and local cafes with directions, distance estimates, and opening hours.
+                Recommends scenic spots, sightseeing destinations, cafes, and popular local restaurants with directions.
               </p>
             </div>
 
@@ -398,25 +384,25 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
                 <UtensilsCrossed className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-serif text-xl font-bold text-white">Digital Food Menu & Ordering</h3>
+              <h3 className="font-serif text-xl font-bold text-white">Digital Food Menu</h3>
               <p className="text-xs sm:text-sm text-[#86868B] leading-relaxed">
-                Incorporate your in-house dining or partner restaurant menu. Guests can browse photos, enquire about ingredients and dietary options, and place food orders with confidence.
+                Guests can view your food menu, ask about ingredients or specials, and place orders directly from their phone.
               </p>
             </div>
           </div>
 
-          {/* Hybrid Architecture Remote Setup Banner */}
-          <div className="reveal-from-top mt-10 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#1C1C1E] to-[#121214] border border-white/15 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2 text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-mono uppercase tracking-wider text-white">
+          {/* Remote Setup Banner */}
+          <div className="reveal-from-top mt-10 p-6 sm:p-8 rounded-3xl bg-[#161618] border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-1.5 text-left">
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-white/70">
                 <Zap className="w-3.5 h-3.5 text-white" />
-                Hybrid Architecture
+                Quick Setup
               </div>
               <h4 className="font-serif text-lg sm:text-xl font-bold text-white">
-                100% Remote, Effortless Setup
+                100% Remote Setup
               </h4>
               <p className="text-xs sm:text-sm text-[#86868B] max-w-2xl leading-relaxed">
-                All tiers are engineered with a hybrid approach so your property’s digital concierge can be configured, tested, and published completely remotely without any on-site hardware or technicians.
+                Everything is set up remotely online. No devices to install, no technicians, and no wiring. Ready to print your QR code in minutes.
               </p>
             </div>
             <button
@@ -424,9 +410,9 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
                 const el = document.getElementById('plans');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="shrink-0 px-6 py-3 rounded-full bg-white hover:bg-[#E5E5EA] text-[#000000] text-xs font-semibold shadow-lg transition-all active:scale-95 cursor-pointer"
+              className="shrink-0 px-6 py-2.5 rounded-full bg-white hover:bg-[#E5E5EA] text-[#000000] text-xs font-semibold shadow-md transition-all active:scale-95 cursor-pointer"
             >
-              View Tiers & Plans
+              See Plans
             </button>
           </div>
         </div>
@@ -436,13 +422,13 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
       <section id="plans" className="py-24 sm:py-32 max-w-6xl mx-auto px-6">
         <div className="reveal-from-top text-center space-y-4 max-w-3xl mx-auto mb-16">
           <span className="text-[11px] uppercase tracking-widest font-mono font-medium text-[#86868B]">
-            Flexible Plans
+            Pricing
           </span>
           <h2 className="font-serif text-3xl sm:text-5xl font-bold text-white leading-tight">
-            Tailored Tiers for Every Host & Hotel
+            Simple Plans for Every Stay
           </h2>
           <p className="text-sm sm:text-base text-[#86868B] leading-relaxed">
-            Choose the level of intelligence your guests experience. Each tier is fully remote-deployable and adapts seamlessly to your property.
+            Pick the plan that fits your property. All plans include easy remote setup and printable QR codes.
           </p>
         </div>
 
@@ -526,7 +512,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
         {/* Remote Setup Guarantee footnote */}
         <div className="reveal-from-top mt-12 text-center text-xs text-[#86868B] max-w-xl mx-auto flex items-center justify-center gap-2">
           <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-          <span>All tiers include hybrid remote deployment, instant QR printable assets, and automated menu syncing.</span>
+          <span>All plans are setup remotely online with instant QR codes and menu support.</span>
         </div>
       </section>
 
@@ -537,14 +523,14 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
           <div className="reveal-from-top flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14">
             <div className="space-y-2">
               <span className="text-[11px] uppercase tracking-widest font-mono font-medium text-[#86868B]">
-                Curated Properties
+                Demo
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white">
-                Experience Relay in action.
+                See how it looks for guests.
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-[#86868B] max-w-sm">
-              Select any residence below to launch its live digital guest assistant.
+              Click any stay below to open the guest assistant demo.
             </p>
           </div>
 
@@ -690,13 +676,13 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
         </div>
       </footer>
 
-      {/* ─── PLAN MODAL (WHEN A USER CLICKS TO SELECT OR INQUIRE ABOUT A PLAN) ─── */}
+      {/* ─── PLAN MODAL ─── */}
       {selectedPlanModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-md bg-[#1C1C1E] border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl text-left">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[10px] uppercase font-mono tracking-widest text-[#86868B]">
-                Setup Plan Selected
+                Plan Selected
               </span>
               <button
                 onClick={() => setSelectedPlanModal(null)}
@@ -710,7 +696,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               {selectedPlanModal}
             </h3>
             <p className="text-xs text-[#86868B] mb-6 leading-relaxed">
-              Every tier comes with our hybrid remote setup guarantee. Scan the QR code, preview guest experience, and configure your property details in minutes.
+              Fast remote setup. Customize your property information, food menu, and print your guest QR codes in minutes.
             </p>
 
             <div className="space-y-3">
@@ -721,7 +707,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
                 }}
                 className="w-full py-3 px-4 rounded-full bg-white hover:bg-[#E5E5EA] text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Launch Interactive Demo</span>
+                <span>Try Demo</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
