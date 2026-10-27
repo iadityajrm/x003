@@ -16,7 +16,8 @@ import {
   Bot,
   Zap,
   Globe,
-  ConciergeBell
+  ConciergeBell,
+  MessageSquareText
 } from 'lucide-react';
 import { PROPERTIES } from '../../data/properties';
 import { PropertyData } from '../../types';
@@ -37,6 +38,8 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
   const [selectedDemoSlug, setSelectedDemoSlug] = useState('cedar-house');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [selectedPlanModal, setSelectedPlanModal] = useState<string | null>(null);
+  const [calcPlanId, setCalcPlanId] = useState<'simple' | 'advanced' | 'integrated'>('simple');
+  const [calcRooms, setCalcRooms] = useState<number>(1);
 
   // Enforce dark mode on landing page by default
   useEffect(() => {
@@ -72,7 +75,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
     {
       title: 'Quick Answers',
       description: 'Wi-Fi, house rules, and check-in help available 24/7.',
-      icon: <Sparkles className="w-5 h-5 text-white" />,
+      icon: <MessageSquareText className="w-5 h-5 text-white" />,
     },
     {
       title: 'Secure Check-in',
@@ -93,57 +96,137 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
 
   const plans = [
     {
-      id: 'simple',
+      id: 'simple' as const,
       name: 'Simple Assistant',
       badge: 'Starter',
       popular: false,
+      monthlyPrice: 199,
+      setupFee: 2999,
+      minRooms: 1,
       tagline: 'Text chat in English for quick answers and essentials.',
       description: 'Best for standard Airbnb and vacation rentals.',
       icon: <Bot className="w-6 h-6 text-white" />,
       features: [
         'Scan QR code to start (no app download)',
-        'English text AI assistant',
+        'Text-based AI concierge (English)',
         'Answers Wi-Fi, property info & rules',
-        'Nearby places and attractions',
+        'Local recommendations',
         'Digital food menu viewing',
-        'Easy remote setup in minutes',
+        '100% remote setup',
       ],
       ctaText: 'Choose Simple',
     },
     {
-      id: 'advanced',
-      name: 'Advanced',
+      id: 'advanced' as const,
+      name: 'Advanced Assistant',
       badge: 'Popular',
       popular: true,
+      monthlyPrice: 599,
+      setupFee: 7499,
+      minRooms: 1,
       tagline: 'Multi-language voice and text with digital food ordering.',
-      description: 'Great for international guests and busy stays.',
+      description: 'Great for international guests and busy luxury stays.',
       icon: <Mic className="w-6 h-6 text-white" />,
       features: [
         'Everything in Simple',
-        'Multi-language support (auto-detects language)',
-        'Voice & speech assistant (talk or type)',
-        'Food menu questions & order placement',
-        'Interactive nearby recommendations',
+        'Multilingual support (auto-detects language)',
+        'Two-way voice AI (talk or type)',
+        'Digital food menu viewing',
+        'Local recommendations',
         'Fast remote setup',
       ],
       ctaText: 'Choose Advanced',
     },
     {
-      id: 'integrated',
-      name: 'Integrated',
+      id: 'integrated' as const,
+      name: 'Integrated Assistant',
       badge: 'Custom',
       popular: false,
+      monthlyPrice: 699,
+      setupFee: 19999,
+      minRooms: 1,
       tagline: 'Custom experience connected directly with your reception.',
       description: 'Ideal for hotels, boutique stays, and serviced apartments.',
       icon: <ConciergeBell className="w-6 h-6 text-white" />,
       features: [
         'Everything in Advanced',
-        'Direct front desk & reception connection',
-        'Send food orders and guest requests to staff',
-        'Custom branding and colors',
+        'Interactive food ordering',
+        'Front-desk integration',
+        'Custom workflows & brand styling',
         'Dedicated onboarding support',
       ],
       ctaText: 'Contact Us',
+    },
+  ];
+
+  const comparisonRows = [
+    {
+      feature: 'Monthly price per room',
+      simple: '₹199',
+      advanced: '₹599',
+      integrated: '₹699',
+      isHighlight: true,
+    },
+    {
+      feature: 'One-time setup fee',
+      simple: '₹2,999',
+      advanced: '₹7,499',
+      integrated: '₹19,999',
+      isHighlight: true,
+    },
+    {
+      feature: 'Text-based AI concierge',
+      simple: true,
+      advanced: true,
+      integrated: true,
+    },
+    {
+      feature: 'Multilingual support',
+      simple: false,
+      advanced: true,
+      integrated: true,
+    },
+    {
+      feature: 'Two-way voice AI',
+      simple: false,
+      advanced: true,
+      integrated: true,
+    },
+    {
+      feature: 'Digital food menu',
+      simple: true,
+      advanced: true,
+      integrated: true,
+    },
+    {
+      feature: 'Interactive food ordering',
+      simple: false,
+      advanced: false,
+      integrated: true,
+    },
+    {
+      feature: 'Local recommendations',
+      simple: true,
+      advanced: true,
+      integrated: true,
+    },
+    {
+      feature: 'Front-desk integration',
+      simple: false,
+      advanced: false,
+      integrated: true,
+    },
+    {
+      feature: 'Custom workflows',
+      simple: false,
+      advanced: false,
+      integrated: true,
+    },
+    {
+      feature: 'Dedicated onboarding',
+      simple: false,
+      advanced: false,
+      integrated: true,
     },
   ];
 
@@ -196,30 +279,62 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               <span className="w-1.5 h-1.5 rounded-full bg-white" />
             </div>
             <div className="flex flex-col">
-              <span className="font-serif text-xl font-bold tracking-tight text-white leading-none">
-                relay
-              </span>
-              <span className="text-[9px] tracking-wider text-[#86868B] uppercase font-mono font-medium mt-0.5">
-                by FramewrkLabs
+              <span className="font-sans text-lg font-extrabold tracking-wider text-white leading-none">
+                RELAY
               </span>
             </div>
           </a>
 
           {/* Center Navigation Links */}
           <nav className="hidden md:flex items-center gap-7 text-xs font-medium text-[#86868B]">
-            <a href="#about" className="hover:text-white transition-colors">
+            <a
+              href="#about"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="hover:text-white transition-colors"
+            >
               About
             </a>
-            <a href="#solution" className="hover:text-white transition-colors">
+            <a
+              href="#solution"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('solution')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="hover:text-white transition-colors"
+            >
               How It Works
             </a>
-            <a href="#plans" className="hover:text-white transition-colors">
+            <a
+              href="#plans"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('plans')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="hover:text-white transition-colors"
+            >
               Pricing
             </a>
-            <a href="#features" className="hover:text-white transition-colors">
+            <a
+              href="#features"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="hover:text-white transition-colors"
+            >
               Features
             </a>
-            <a href="#faq" className="hover:text-white transition-colors">
+            <a
+              href="#faq"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="hover:text-white transition-colors"
+            >
               FAQs
             </a>
           </nav>
@@ -332,7 +447,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10">
                 {feat.icon}
               </div>
-              <h3 className="font-serif text-xl font-bold text-white">
+              <h3 className="font-sans text-lg font-bold text-white">
                 {feat.title}
               </h3>
               <p className="text-xs sm:text-sm text-[#86868B] leading-relaxed">
@@ -364,7 +479,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
                 <QrCode className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-serif text-xl font-bold text-white">Instant Answers</h3>
+              <h3 className="font-sans text-lg font-bold text-white">Instant Answers</h3>
               <p className="text-xs sm:text-sm text-[#86868B] leading-relaxed">
                 Answers Wi-Fi passwords, parking info, check-in instructions, and house rules whenever guests need them.
               </p>
@@ -374,7 +489,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
                 <Compass className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-serif text-xl font-bold text-white">Nearby Places</h3>
+              <h3 className="font-sans text-lg font-bold text-white">Nearby Places</h3>
               <p className="text-xs sm:text-sm text-[#86868B] leading-relaxed">
                 Recommends scenic spots, sightseeing destinations, cafes, and popular local restaurants with directions.
               </p>
@@ -384,7 +499,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
                 <UtensilsCrossed className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-serif text-xl font-bold text-white">Digital Food Menu</h3>
+              <h3 className="font-sans text-lg font-bold text-white">Digital Food Menu</h3>
               <p className="text-xs sm:text-sm text-[#86868B] leading-relaxed">
                 Guests can view your food menu, ask about ingredients or specials, and place orders directly from their phone.
               </p>
@@ -460,10 +575,24 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
 
               {/* Title & Description */}
               <div className="space-y-3">
-                <h3 className="font-serif text-2xl font-bold text-white">
+                <h3 className="font-sans text-xl font-bold text-white">
                   {plan.name}
                 </h3>
-                <p className="text-xs font-medium text-white/90">
+                
+                {/* Price display */}
+                <div className="space-y-1 pt-1">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-serif text-3xl font-bold text-white">
+                      ₹{plan.monthlyPrice}
+                    </span>
+                    <span className="text-xs text-[#86868B]">/ room / month</span>
+                  </div>
+                  <div className="text-[11px] font-mono text-[#86868B]">
+                    + ₹{plan.setupFee.toLocaleString('en-IN')} one-time setup
+                  </div>
+                </div>
+
+                <p className="text-xs font-medium text-white/90 pt-1">
                   {plan.tagline}
                 </p>
                 <p className="text-xs text-[#86868B] leading-relaxed">
@@ -507,6 +636,234 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               </button>
             </div>
           ))}
+        </div>
+
+        {/* ─── PAYMENT CALCULATOR ─── */}
+        <div className="reveal-from-top mt-16 p-8 sm:p-10 rounded-3xl bg-[#141416] border border-white/10 shadow-2xl">
+          <div className="max-w-2xl mx-auto text-center space-y-2 mb-8">
+            <span className="text-[10px] uppercase font-mono tracking-widest text-[#86868B]">
+              Quick Price Estimate
+            </span>
+            <h3 className="font-sans text-2xl sm:text-3xl font-bold text-white">
+              Estimate Your Total Investment
+            </h3>
+            <p className="text-xs text-[#86868B]">
+              Select a plan and slide to the number of rooms in your property.
+            </p>
+          </div>
+
+          {/* Plan Selector Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 mb-8">
+            {plans.map((p) => {
+              const isSelected = calcPlanId === p.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => {
+                    setCalcPlanId(p.id);
+                    if (calcRooms < p.minRooms) setCalcRooms(p.minRooms);
+                  }}
+                  className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-white text-black shadow-lg scale-105'
+                      : 'bg-white/5 hover:bg-white/10 text-white/70 border border-white/10'
+                  }`}
+                >
+                  {p.name}
+                </button>
+              );
+            })}
+          </div>
+
+          {(() => {
+            const currentPlan = plans.find((p) => p.id === calcPlanId) || plans[0];
+            const monthlyTotal = currentPlan.monthlyPrice * calcRooms;
+            const oneTimeSetup = currentPlan.setupFee;
+            const firstMonthTotal = monthlyTotal + oneTimeSetup;
+
+            return (
+              <div className="max-w-xl mx-auto space-y-8">
+                {/* Room Slider */}
+                <div className="space-y-4 bg-white/5 p-6 rounded-2xl border border-white/10">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono uppercase text-[#86868B] tracking-wider">
+                      Number of Rooms
+                    </span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="font-serif text-2xl font-bold text-white">
+                        {calcRooms}
+                      </span>
+                      <span className="text-xs text-[#86868B]">
+                        {calcRooms === 1 ? 'room' : 'rooms'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <input
+                    type="range"
+                    min={currentPlan.minRooms}
+                    max={100}
+                    step={1}
+                    value={calcRooms}
+                    onChange={(e) => setCalcRooms(Math.max(currentPlan.minRooms, Number(e.target.value)))}
+                    className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-white"
+                  />
+
+                  <div className="flex justify-between text-[11px] font-mono text-[#86868B]">
+                    <span>{currentPlan.minRooms} room (minimum)</span>
+                    <span>100 rooms</span>
+                  </div>
+                </div>
+
+                {/* Calculation Breakdown Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                  <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-[#86868B]">
+                      Monthly Recurring
+                    </div>
+                    <div className="font-serif text-xl sm:text-2xl font-bold text-white">
+                      ₹{monthlyTotal.toLocaleString('en-IN')}
+                    </div>
+                    <div className="text-[10px] text-[#86868B]">
+                      ₹{currentPlan.monthlyPrice} × {calcRooms} {calcRooms === 1 ? 'room' : 'rooms'}
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-[#86868B]">
+                      One-time Setup
+                    </div>
+                    <div className="font-serif text-xl sm:text-2xl font-bold text-white">
+                      ₹{oneTimeSetup.toLocaleString('en-IN')}
+                    </div>
+                    <div className="text-[10px] text-[#86868B]">
+                      One-time fee
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-white/10 border border-white/20 space-y-1">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-white/80">
+                      First Month Total
+                    </div>
+                    <div className="font-serif text-xl sm:text-2xl font-bold text-white">
+                      ₹{firstMonthTotal.toLocaleString('en-IN')}
+                    </div>
+                    <div className="text-[10px] text-white/70">
+                      Setup + 1st month
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center pt-2">
+                  <button
+                    onClick={() => setSelectedPlanModal(currentPlan.name)}
+                    className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white hover:bg-[#E5E5EA] text-black text-xs font-semibold shadow-xl active:scale-95 transition-all cursor-pointer"
+                  >
+                    <span>Get Started with {currentPlan.name}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* ─── DETAILED FEATURE COMPARISON TABLE ─── */}
+        <div className="reveal-from-top mt-16">
+          <div className="text-center space-y-2 mb-8">
+            <span className="text-[10px] uppercase font-mono tracking-widest text-[#86868B]">
+              Detailed Comparison
+            </span>
+            <h3 className="font-sans text-2xl sm:text-3xl font-bold text-white">
+              Compare Features Across Plans
+            </h3>
+          </div>
+
+          <div className="overflow-x-auto rounded-3xl border border-white/10 bg-[#141416]/90 shadow-xl">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-white/10 bg-white/[0.03]">
+                  <th className="p-4 sm:p-5 text-xs font-mono uppercase tracking-wider text-[#86868B] font-semibold">
+                    Feature
+                  </th>
+                  <th className="p-4 sm:p-5 text-xs font-serif font-bold text-white text-center sm:text-left">
+                    Simple Assistant
+                  </th>
+                  <th className="p-4 sm:p-5 text-xs font-serif font-bold text-white text-center sm:text-left">
+                    Advanced Assistant
+                  </th>
+                  <th className="p-4 sm:p-5 text-xs font-serif font-bold text-white text-center sm:text-left">
+                    Integrated Assistant
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-xs">
+                {comparisonRows.map((row, rIdx) => (
+                  <tr
+                    key={rIdx}
+                    className={`hover:bg-white/[0.02] transition-colors ${
+                      row.isHighlight ? 'bg-white/[0.02] font-semibold' : ''
+                    }`}
+                  >
+                    <td className="p-4 sm:p-5 text-white/90 font-medium">
+                      {row.feature}
+                    </td>
+
+                    {/* Simple Column */}
+                    <td className="p-4 sm:p-5 text-center sm:text-left">
+                      {typeof row.simple === 'boolean' ? (
+                        row.simple ? (
+                          <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/10 text-white">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        ) : (
+                          <span className="text-[#86868B] text-base font-light">—</span>
+                        )
+                      ) : (
+                        <span className="font-mono text-white text-xs sm:text-sm">
+                          {row.simple}
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Advanced Column */}
+                    <td className="p-4 sm:p-5 text-center sm:text-left">
+                      {typeof row.advanced === 'boolean' ? (
+                        row.advanced ? (
+                          <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/10 text-white">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        ) : (
+                          <span className="text-[#86868B] text-base font-light">—</span>
+                        )
+                      ) : (
+                        <span className="font-mono text-white text-xs sm:text-sm">
+                          {row.advanced}
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Integrated Column */}
+                    <td className="p-4 sm:p-5 text-center sm:text-left">
+                      {typeof row.integrated === 'boolean' ? (
+                        row.integrated ? (
+                          <div className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/10 text-white">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        ) : (
+                          <span className="text-[#86868B] text-base font-light">—</span>
+                        )
+                      ) : (
+                        <span className="font-mono text-white text-xs sm:text-sm">
+                          {row.integrated}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Remote Setup Guarantee footnote */}
@@ -556,7 +913,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
                   </div>
 
                   <div className="p-6 space-y-2">
-                    <h3 className="font-serif text-lg font-bold text-white group-hover:text-white/80 transition-colors">
+                    <h3 className="font-sans text-lg font-bold text-white group-hover:text-white/80 transition-colors">
                       {prop.name}
                     </h3>
                     <p className="text-xs text-[#86868B] line-clamp-2 leading-relaxed">
@@ -692,7 +1049,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               </button>
             </div>
             
-            <h3 className="font-serif text-2xl font-bold text-white mb-2">
+            <h3 className="font-sans text-xl font-bold text-white mb-2">
               {selectedPlanModal}
             </h3>
             <p className="text-xs text-[#86868B] mb-6 leading-relaxed">

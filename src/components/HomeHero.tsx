@@ -275,7 +275,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
           </div>
         </div>
 
-        {/* Return Home Card */}
+        {/* Return to Property Card */}
         <a 
           href={`https://www.google.com/maps/dir/?api=1&destination=${property.coordinates?.lat || 39.1677},${property.coordinates?.lng || -120.1452}`}
           target="_blank"
@@ -292,12 +292,12 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
           <div className="mt-3">
             <div className="flex items-center justify-between text-[#1D1D1F] dark:text-white">
               <h3 className="font-bold text-sm sm:text-base group-hover:text-[#636366] dark:group-hover:text-[#A1A1A6] transition-colors leading-tight">
-                Return Home
+                Return to {property.name}
               </h3>
               <ArrowRight className="w-4 h-4 text-[#86868B] dark:text-[#A1A1A6] group-hover:text-[#1D1D1F] dark:group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
             </div>
             <p className="text-xs text-[#86868B] dark:text-[#A1A1A6] font-medium mt-0.5 truncate">
-              Way to Home · Maps
+              Maps
             </p>
           </div>
         </a>
