@@ -39,7 +39,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [selectedPlanModal, setSelectedPlanModal] = useState<string | null>(null);
   const [calcPlanId, setCalcPlanId] = useState<'simple' | 'advanced' | 'integrated'>('simple');
-  const [calcRooms, setCalcRooms] = useState<number>(1);
+  const [calcRooms, setCalcRooms] = useState<number>(4);
 
   // Enforce dark mode on landing page by default
   useEffect(() => {
@@ -102,7 +102,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
       popular: false,
       monthlyPrice: 199,
       setupFee: 2999,
-      minRooms: 1,
+      minRooms: 4,
       tagline: 'Text chat in English for quick answers and essentials.',
       description: 'Best for standard Airbnb and vacation rentals.',
       icon: <Bot className="w-6 h-6 text-white" />,
@@ -123,7 +123,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
       popular: true,
       monthlyPrice: 599,
       setupFee: 7499,
-      minRooms: 1,
+      minRooms: 4,
       tagline: 'Multi-language voice and text with digital food ordering.',
       description: 'Great for international guests and busy luxury stays.',
       icon: <Mic className="w-6 h-6 text-white" />,
@@ -144,7 +144,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
       popular: false,
       monthlyPrice: 699,
       setupFee: 19999,
-      minRooms: 1,
+      minRooms: 4,
       tagline: 'Custom experience connected directly with your reception.',
       description: 'Ideal for hotels, boutique stays, and serviced apartments.',
       icon: <ConciergeBell className="w-6 h-6 text-white" />,
@@ -288,16 +288,6 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
           {/* Center Navigation Links */}
           <nav className="hidden md:flex items-center gap-7 text-xs font-medium text-[#86868B]">
             <a
-              href="#about"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="hover:text-white transition-colors"
-            >
-              About
-            </a>
-            <a
               href="#solution"
               onClick={(e) => {
                 e.preventDefault();
@@ -422,7 +412,8 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
 
       </section>
 
-      {/* ─── ABOUT & PHILOSOPHY ─── */}
+      {/* ─── ABOUT & PHILOSOPHY (COMMENTED OUT FOR NOW) ─── */}
+      {/*
       <section id="about" className="py-24 sm:py-32 max-w-5xl mx-auto px-6">
         <div className="reveal-from-top text-center space-y-4 max-w-2xl mx-auto">
           <span className="text-[11px] uppercase tracking-widest font-mono font-medium text-[#86868B]">
@@ -436,7 +427,6 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
           </p>
         </div>
 
-        {/* 4 Feature Cards */}
         <div id="features" className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {features.map((feat, idx) => (
             <div
@@ -457,6 +447,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
           ))}
         </div>
       </section>
+      */}
 
       {/* ─── HOW IT WORKS ─── */}
       <section id="solution" className="py-24 sm:py-32 bg-[#050505] border-t border-white/10">
@@ -604,10 +595,7 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
               <div className="my-6 border-t border-white/10" />
 
               {/* Features List */}
-              <div className="space-y-3 mb-8 flex-1">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#86868B]">
-                  Included Capabilities:
-                </span>
+              <div className="mb-8 flex-1">
                 <ul className="space-y-2.5 text-xs text-[#D1D1D6]">
                   {plan.features.map((feature, fIdx) => (
                     <li key={fIdx} className="flex items-start gap-2.5 leading-relaxed">
@@ -716,40 +704,28 @@ export const DwellioWebsite: React.FC<DwellioWebsiteProps> = ({
                 </div>
 
                 {/* Calculation Breakdown Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                  <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
                     <div className="text-[10px] font-mono uppercase tracking-wider text-[#86868B]">
                       Monthly Recurring
                     </div>
-                    <div className="font-serif text-xl sm:text-2xl font-bold text-white">
+                    <div className="font-serif text-2xl sm:text-3xl font-bold text-white">
                       ₹{monthlyTotal.toLocaleString('en-IN')}
                     </div>
-                    <div className="text-[10px] text-[#86868B]">
+                    <div className="text-[11px] text-[#86868B]">
                       ₹{currentPlan.monthlyPrice} × {calcRooms} {calcRooms === 1 ? 'room' : 'rooms'}
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
                     <div className="text-[10px] font-mono uppercase tracking-wider text-[#86868B]">
                       One-time Setup
                     </div>
-                    <div className="font-serif text-xl sm:text-2xl font-bold text-white">
+                    <div className="font-serif text-2xl sm:text-3xl font-bold text-white">
                       ₹{oneTimeSetup.toLocaleString('en-IN')}
                     </div>
-                    <div className="text-[10px] text-[#86868B]">
+                    <div className="text-[11px] text-[#86868B]">
                       One-time fee
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-white/10 border border-white/20 space-y-1">
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-white/80">
-                      First Month Total
-                    </div>
-                    <div className="font-serif text-xl sm:text-2xl font-bold text-white">
-                      ₹{firstMonthTotal.toLocaleString('en-IN')}
-                    </div>
-                    <div className="text-[10px] text-white/70">
-                      Setup + 1st month
                     </div>
                   </div>
                 </div>
